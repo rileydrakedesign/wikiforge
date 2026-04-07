@@ -1,0 +1,86 @@
+---
+type: concept
+title: "{{title}}"
+tags:
+{{#each tags}}
+  - "{{this}}"
+{{/each}}
+{{#unless tags}}
+  - "uncategorized"
+{{/unless}}
+first_mentioned: "{{first_mentioned}}"
+source_count: {{source_count}}
+last_updated: "{{last_updated}}"
+confidence: {{confidence}}
+---
+
+# {{title}}
+
+## Definition
+
+{{#if definition}}
+{{definition}}
+{{else}}
+<!-- Provide a clear, concise definition of this concept. -->
+{{/if}}
+
+## Key Ideas
+
+{{#if key_ideas}}
+{{#each key_ideas}}
+- {{this}}
+{{/each}}
+{{else}}
+<!-- List the core ideas or principles behind this concept.
+- Idea one
+- Idea two
+-->
+{{/if}}
+
+## Evidence
+
+{{#if evidence}}
+{{#each evidence}}
+### {{this.claim}}
+
+{{this.detail}}
+
+{{#if this.source}}
+> Source: [{{this.source.title}}]({{this.source.path}})
+{{/if}}
+
+{{/each}}
+{{else}}
+<!-- Document evidence supporting or refining this concept.
+
+### Claim or finding
+
+Description of the evidence.
+
+> Source: [[source-summary-filename]]
+-->
+{{/if}}
+
+## Related Concepts
+
+{{#if related_concepts}}
+{{#each related_concepts}}
+- [[{{this.name}}]]{{#if this.relationship}} — {{this.relationship}}{{/if}}
+{{/each}}
+{{else}}
+<!-- Link to related concept pages.
+- [[Concept Name]] — relationship description
+-->
+{{/if}}
+
+## Sources
+
+{{#if sources}}
+{{#each sources}}
+- [{{this.title}}]({{this.path}}){{#if this.date}} ({{this.date}}){{/if}}
+{{/each}}
+{{else}}
+<!-- Link to source summaries where this concept appears.
+- [[source-summary-filename]]
+-->
+{{/if}}

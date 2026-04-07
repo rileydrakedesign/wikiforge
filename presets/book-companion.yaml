@@ -1,0 +1,34 @@
+version: 1
+project:
+  name: "book-companion"
+  domain: ""
+  description: "Chapter-by-chapter reading companion and knowledge base"
+  created: ""
+
+knowledge:
+  source_types:
+    - books
+    - articles
+  organization: chronological
+  scale: small
+
+agents:
+  tool: claude-code
+  enabled:
+    - ingestion
+    - query
+    - lint
+    - synthesis
+  party_mode: false
+
+workflows:
+  ingestion_style: deliberate
+  outputs:
+    - markdown
+  tools:
+    - search
+
+wiki:
+  frontmatter: true
+  citation_format: inline
+  cross_ref_style: markdown-link

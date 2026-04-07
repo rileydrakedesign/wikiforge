@@ -1,0 +1,41 @@
+{
+  "name": "{{config.project.name}} WikiForge Clipper",
+  "behavior": "create",
+  "noteContentFormat": "{{"{{"}}content{{"}}"}}",
+  "properties": [
+    {
+      "name": "title",
+      "value": "{{"{{"}}title{{"}}"}}"
+    },
+    {
+      "name": "author",
+      "value": "{{"{{"}}author{{"}}"}}"
+    },
+    {
+      "name": "date",
+      "value": "{{"{{"}}date{{"}}"}}"
+    },
+    {
+      "name": "url",
+      "value": "{{"{{"}}url{{"}}"}}"
+    },
+    {
+      "name": "source_type",
+      "value": "article"
+    },
+    {
+      "name": "content_hash",
+      "value": ""
+    },
+    {
+      "name": "ingested_at",
+      "value": ""
+    },
+    {
+      "name": "status",
+      "value": "raw"
+    }
+  ],
+  "path": "raw/articles",
+  "noteNameFormat": "{{"{{"}}title | slugify{{"}}"}}"
+}

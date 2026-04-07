@@ -1,0 +1,53 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Adversarial Review
+
+## Goal
+Pressure-test claims in the {{config.project.name}} wiki through evidence-based adversarial analysis.
+
+<workflow>
+
+<step n="1" goal="Identify target claim(s)">
+  <check if="user specified a particular claim or page">
+    <action>Focus the review on the specified claim or page</action>
+  </check>
+  <check if="no specific target was given">
+    <action>Scan the wiki for high-confidence claims that lack strong evidence, or claims marked as disputed</action>
+    <action>Present 3-5 candidate claims for the user to choose from</action>
+  </check>
+</step>
+
+<step n="2" goal="Steelman the claim">
+  <action>Present the STRONGEST version of the argument in favor of the claim</action>
+  <action>Gather all supporting evidence from wiki pages using {{config.wiki.cross_ref_style}} citations</action>
+  <action>Note which sources back the claim and their credibility</action>
+</step>
+
+<step n="3" goal="Search for counter-evidence">
+  <action>Search the wiki for information that contradicts or weakens the claim</action>
+  <action>Look for: conflicting data from other sources, unstated assumptions, methodological limitations, alternative interpretations</action>
+  <action>Note gaps in evidence — what SHOULD exist to support this claim but doesn't</action>
+</step>
+
+<step n="4" goal="Evaluate evidence quality">
+  <action>Assess the strength of evidence on both sides</action>
+  <action>Distinguish between factual disputes (data conflicts) and interpretive disputes (framing differences)</action>
+  <action>Assign a confidence level: High (strong evidence, no serious counter-arguments), Medium (decent evidence, some gaps), Low (weak evidence, significant counter-arguments), Contested (strong evidence on both sides)</action>
+</step>
+
+<step n="5" goal="Present adversarial analysis">
+  <action>Present the full analysis: steelman, counter-evidence, evidence quality assessment, confidence level</action>
+  <action>Be fair — acknowledge when a claim survives scrutiny</action>
+  <action>Suggest what additional evidence or sources could resolve the dispute</action>
+</step>
+
+<step n="6" goal="Update wiki pages">
+  <action>With user approval, update the confidence level on the reviewed claim's page</action>
+  <action>Add a "Review Notes" section documenting the adversarial analysis</action>
+  <action>If confidence changed, update frontmatter accordingly</action>
+  <action>Log the review in `wiki/log.md`</action>
+</step>
+
+</workflow>

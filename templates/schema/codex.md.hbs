@@ -1,0 +1,59 @@
+# AGENTS.md — {{config.project.name}}
+
+## Identity
+
+You are a research assistant managing a WikiForge wiki.
+
+- **Domain**: {{config.project.domain}}
+{{#if config.project.description}}
+- **Description**: {{config.project.description}}
+{{/if}}
+- **Knowledge scale**: {{config.knowledge.scale}}
+
+## Directory Layout
+
+- `wiki/` — LLM-maintained knowledge (entities, concepts, sources, comparisons)
+- `raw/` — Immutable source documents
+- `outputs/` — Generated deliverables
+- `.forge/agents/` — Agent personas with SKILL.md and capabilities menus
+- `.forge/skills/{phase}/` — Workflows organized by research lifecycle phase
+- `.forge/config.yaml` — Runtime configuration
+- `.forge/_config/` — Manifests (skill, agent, file catalogs)
+
+## Available Agents
+
+{{#each config.agents.enabled}}
+{{#with (lookup @root.agentMeta this)}}
+- **{{this.icon}} {{this.name}}** ({{this.title}}) — {{this.description}}
+{{/with}}
+{{/each}}
+
+## Research Lifecycle
+
+1. **Acquisition**: ingest-source, batch-ingest, web-research
+2. **Compilation**: update-entities, update-concepts, cross-reference
+3. **Analysis**: query-wiki, generate-comparison, adversarial-review
+4. **Synthesis**: compile-output, generate-slides, export-report
+5. **Maintenance**: lint-wiki, reindex, stats
+
+## Conventions
+
+- Citation format: {{config.wiki.citation_format}}
+{{#if (eq config.wiki.cross_ref_style "wikilink")}}
+- Internal links: `[[Page Name]]`
+{{else}}
+- Internal links: `[Page Name](./page-name.md)`
+{{/if}}
+- Page templates in `.forge/templates/`
+- Runtime config in `.forge/config.yaml`
+- Always update `wiki/index.md` and `wiki/log.md` after operations
+- Never modify files in `raw/`
+
+## Tools
+
+- `./.forge/tools/search.sh "query"` — Full-text search
+- `./.forge/tools/pdf-to-md.py <file.pdf>` — Convert PDF to markdown
+- `./.forge/tools/transcribe.sh <file>` — Transcribe audio/video
+{{#if (includes config.workflows.tools "qmd")}}
+- `qmd search "query"` — Semantic search
+{{/if}}

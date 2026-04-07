@@ -1,0 +1,42 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Cross-Reference
+
+## Goal
+Build and verify cross-references between pages in the {{config.project.name}} wiki.
+
+<workflow>
+
+<step n="1" goal="Scan existing cross-references">
+  <action>Read every wiki page and extract all {{config.wiki.cross_ref_style}} links</action>
+  <action>Build a link graph: for each page, track outbound and inbound links</action>
+  <action>Identify pages with zero or very few outbound/inbound links</action>
+</step>
+
+<step n="2" goal="Identify missing connections">
+  <action>For each entity page, check if related entities (co-mentioned in sources) are linked</action>
+  <action>For each concept page, check if related concepts are linked</action>
+  <action>Check if source summary pages link to all entities and concepts they mention</action>
+  <action>Flag one-directional links that should be bidirectional</action>
+</step>
+
+<step n="3" goal="Add missing cross-references">
+  <action>For each identified missing link, add a {{config.wiki.cross_ref_style}} reference</action>
+  <action>Ensure bidirectional linking: if A links to B, B should link to A</action>
+  <action>Place links in contextually appropriate sections (Related Entities, Related Concepts, Sources)</action>
+</step>
+
+<step n="4" goal="Fix broken references">
+  <action>Identify links that point to non-existent pages</action>
+  <action>For each broken link: check if the target was renamed (search for similar titles) or if the page should be created</action>
+  <action>Fix renames, flag pages that need creation</action>
+</step>
+
+<step n="5" goal="Report and log">
+  <action>Report: links added, broken links fixed, remaining broken links, pages with low connectivity</action>
+  <action>Log the cross-reference session in `wiki/log.md`</action>
+</step>
+
+</workflow>

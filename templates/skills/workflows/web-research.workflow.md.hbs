@@ -1,0 +1,49 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Web Research
+
+## Goal
+Find new high-quality sources to fill knowledge gaps in the {{config.project.name}} wiki.
+
+<workflow>
+
+<step n="1" goal="Identify knowledge gaps">
+  <action>Review `wiki/index.md` and `wiki/overview.md` to understand current coverage</action>
+  <action>If the user specified a topic, focus gap analysis on that area</action>
+  <action>Check `wiki/log.md` for recent lint reports that identified gaps</action>
+  <action>List the top 3-5 gaps worth filling</action>
+</step>
+
+<step n="2" goal="Formulate search queries">
+  <action>For each identified gap, craft 2-3 targeted search queries</action>
+  <action>Include domain-specific terminology relevant to {{config.project.domain}}</action>
+  <action>Prefer queries that target authoritative sources (academic, institutional, expert)</action>
+</step>
+
+<step n="3" goal="Execute search">
+  <action>Search the web using the crafted queries</action>
+  <action>Collect candidate sources: title, URL, publication date, author/publisher, brief description</action>
+  <action>Aim for 5-10 candidates per gap area</action>
+</step>
+
+<step n="4" goal="Evaluate and rank candidates">
+  <action>For each candidate, assess: credibility, recency, relevance to wiki domain, depth of coverage</action>
+  <action>Cross-reference against `wiki/sources/` to exclude already-ingested material</action>
+  <action>Rank by quality score (credibility × relevance × recency)</action>
+</step>
+
+<step n="5" goal="Present recommendations">
+  <action>Present the top 3-5 sources per gap area with: title, URL, date, credibility assessment, relevance explanation</action>
+  <action>Group recommendations by gap area</action>
+  <action>Note which existing wiki pages would benefit from each source</action>
+</step>
+
+<step n="6" goal="Queue for ingestion">
+  <action>Ask the user which recommended sources to ingest</action>
+  <action>For approved sources, either queue them for batch ingestion or begin single-source ingestion</action>
+  <action>Log the research session in `wiki/log.md`</action>
+</step>
+
+</workflow>

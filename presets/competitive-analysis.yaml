@@ -1,0 +1,39 @@
+version: 1
+project:
+  name: "competitive-analysis"
+  domain: ""
+  description: "Market and competitive intelligence knowledge base"
+  created: ""
+
+knowledge:
+  source_types:
+    - articles
+    - data_files
+    - social_media
+  organization: entity-first
+  scale: medium
+
+agents:
+  tool: claude-code
+  enabled:
+    - ingestion
+    - query
+    - lint
+    - research
+    - analysis
+    - synthesis
+  party_mode: true
+
+workflows:
+  ingestion_style: batch
+  outputs:
+    - markdown
+    - marp
+  tools:
+    - search
+    - stats
+
+wiki:
+  frontmatter: true
+  citation_format: inline
+  cross_ref_style: markdown-link

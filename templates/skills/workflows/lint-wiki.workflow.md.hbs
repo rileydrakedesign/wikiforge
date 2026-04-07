@@ -1,0 +1,85 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Lint Wiki
+
+## Goal
+Comprehensive health check of the {{config.project.name}} wiki — find contradictions, orphans, stale content, structural issues, and growth opportunities. A wiki is only as good as its maintenance. The LLM handles the maintenance burden that causes humans to abandon wikis.
+
+<workflow>
+
+<step n="1" goal="Scan all wiki pages">
+  <action>Read `wiki/index.md` to get the catalog of all known pages</action>
+  <action>Scan the filesystem under `wiki/` to find all actual .md files</action>
+  <action>Compare the two lists to identify discrepancies</action>
+</step>
+
+<step n="2" goal="Check frontmatter consistency">
+{{#if config.wiki.frontmatter}}
+  <action>For each wiki page, verify required frontmatter fields exist: type, title, last_updated</action>
+  <action>Check that frontmatter values are valid (dates are parseable, types are recognized)</action>
+  <action>Flag pages with missing or malformed frontmatter</action>
+  <action>Check content_hash fields in source summaries — if a raw source has changed since ingestion, the hash will mismatch, signaling the wiki page may be stale</action>
+{{else}}
+  <action>Frontmatter is disabled — skip this check</action>
+{{/if}}
+</step>
+
+<step n="3" goal="Detect orphan pages">
+  <action>Find pages that exist on disk but are NOT listed in `wiki/index.md`</action>
+  <action>Find pages that have NO inbound {{config.wiki.cross_ref_style}} links from other pages</action>
+  <action>Classify orphans: newly created (may just need indexing) vs. truly disconnected</action>
+</step>
+
+<step n="4" goal="Check cross-references">
+  <action>Scan all {{config.wiki.cross_ref_style}} links in every wiki page</action>
+  <action>Verify each link target exists</action>
+  <action>Flag broken links (point to non-existent pages)</action>
+  <action>Check for one-directional links that should be bidirectional — if page A links to page B, page B should link back</action>
+</step>
+
+<step n="5" goal="Detect mentioned-but-uncreated pages">
+  <critical>This is important for wiki growth: find concepts, entities, or topics that are mentioned in page text but do not yet have their own dedicated wiki page.</critical>
+  <action>Scan page content for proper nouns, capitalized terms, or phrases that appear repeatedly across multiple pages but lack a dedicated page in `wiki/entities/` or `wiki/concepts/`</action>
+  <action>Look for {{config.wiki.cross_ref_style}} links that point to pages that don't exist yet — these are explicit signals that a page should be created</action>
+  <action>Rank by frequency: concepts mentioned across many pages are higher priority than those mentioned once</action>
+  <action>Report these as "suggested new pages" — the wiki should grow to cover everything it references</action>
+</step>
+
+<step n="6" goal="Identify contradictions and stale content">
+  <action>Scan pages for claims about the same entity or concept that conflict</action>
+  <action>Check for pages with `confidence: disputed` that have not been resolved</action>
+  <action>Look for stale claims — information from old sources that newer sources may have superseded</action>
+  <action>Check last_updated dates — pages not updated in a long time may contain outdated information</action>
+</step>
+
+<step n="7" goal="Check source coverage">
+  <action>Verify that every file in `raw/` has a corresponding summary in `wiki/sources/`</action>
+  <action>Flag raw sources that were never ingested — these represent uncompiled knowledge</action>
+  <action>Check for source summary pages that reference missing raw files</action>
+</step>
+
+<step n="8" goal="Verify index and overview">
+  <action>Ensure every wiki page appears in `wiki/index.md` under the correct category</action>
+  <action>Check that index entries match actual page titles</action>
+  <action>Verify the index follows {{config.knowledge.organization}} organization style</action>
+  <action>Check `wiki/overview.md` — are the Key Themes still accurate? Are the Open Questions still open? Are the Statistics current?</action>
+</step>
+
+<step n="9" goal="Compile health report">
+  <action>Group all issues by category: Contradictions, Orphan Pages, Broken Links, Mentioned-But-Uncreated Pages, Stale Claims, Frontmatter Issues, Index Gaps, Source Gaps, Overview Staleness</action>
+  <action>Sort by severity: errors (contradictions, broken links) before warnings (stale claims, missing tags) before suggestions (new pages to create)</action>
+  <action>For each issue, include a suggested fix or next action</action>
+  <action>Calculate summary statistics: total pages, total issues, health score (percentage of pages without issues), un-ingested sources count</action>
+</step>
+
+<step n="10" goal="Present report and suggest next actions">
+  <action>Present the categorized report with summary statistics at the top</action>
+  <action>Append a lint entry to `wiki/log.md` with the summary statistics</action>
+  <action>Suggest priority order for fixing issues</action>
+  <action>Specifically recommend: new pages to create, sources to ingest, contradictions to review, and questions worth investigating</action>
+  <action>The LLM is good at suggesting new questions to investigate and new sources to look for — do this actively</action>
+</step>
+
+</workflow>

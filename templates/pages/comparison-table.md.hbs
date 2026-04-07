@@ -1,0 +1,64 @@
+---
+type: comparison
+title: "{{title}}"
+subjects:
+{{#each subjects}}
+  - "{{this}}"
+{{/each}}
+created: "{{created}}"
+last_updated: "{{last_updated}}"
+---
+
+# {{title}}
+
+## Overview
+
+{{#if overview}}
+{{overview}}
+{{else}}
+<!-- Describe what is being compared and why.
+This comparison examines the differences and similarities between the subjects listed above.
+-->
+{{/if}}
+
+## Comparison Table
+
+{{#if table}}
+| Attribute | {{#each subjects}}{{this}}{{#unless @last}} | {{/unless}}{{/each}} |
+|-----------|{{#each subjects}}---{{#unless @last}}|{{/unless}}{{/each}}|
+{{#each table}}
+| {{this.attribute}} | {{#each this.values}}{{this}}{{#unless @last}} | {{/unless}}{{/each}} |
+{{/each}}
+{{else}}
+<!-- Build a comparison table. Example:
+
+| Attribute | Subject A | Subject B |
+|-----------|-----------|-----------|
+| Category  | Value A   | Value B   |
+| Feature   | Yes       | No        |
+-->
+{{/if}}
+
+## Analysis
+
+{{#if analysis}}
+{{analysis}}
+{{else}}
+<!-- Write a brief analysis of the comparison.
+- What are the key differences?
+- What are the surprising similarities?
+- What are the trade-offs?
+-->
+{{/if}}
+
+## Sources
+
+{{#if sources}}
+{{#each sources}}
+- [{{this.title}}]({{this.path}}){{#if this.date}} ({{this.date}}){{/if}}
+{{/each}}
+{{else}}
+<!-- Link to source summaries that informed this comparison.
+- [[source-summary-filename]]
+-->
+{{/if}}

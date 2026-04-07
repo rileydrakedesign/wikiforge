@@ -1,0 +1,43 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Wiki Statistics
+
+## Goal
+Generate a health and statistics dashboard for the {{config.project.name}} wiki.
+
+<workflow>
+
+<step n="1" goal="Count pages by type">
+  <action>Scan `wiki/` filesystem and count: total pages, entities, concepts, source summaries, comparisons</action>
+  <action>Count files in `raw/` by source type subdirectory</action>
+  <action>Count files in `outputs/` by type (slides, reports, exports)</action>
+</step>
+
+<step n="2" goal="Analyze wiki activity">
+  <action>Parse `wiki/log.md` for recent activity</action>
+  <action>Count operations by type: ingestions, queries, lint passes, comparisons, exports</action>
+  <action>Identify the most recently updated pages</action>
+  <action>Calculate: average pages touched per ingestion, days since last ingestion</action>
+</step>
+
+<step n="3" goal="Assess cross-reference density">
+  <action>Count total {{config.wiki.cross_ref_style}} links across all wiki pages</action>
+  <action>Calculate average links per page</action>
+  <action>Identify the most connected pages (hubs) and least connected pages (orphans)</action>
+</step>
+
+<step n="4" goal="Check source coverage">
+  <action>Count raw sources vs. ingested sources (those with wiki/sources/ summaries)</action>
+  <action>Calculate ingestion coverage percentage</action>
+  <action>Identify un-ingested raw sources</action>
+</step>
+
+<step n="5" goal="Present dashboard">
+  <action>Format a structured dashboard with sections: Page Counts, Activity Summary, Cross-Reference Health, Source Coverage, Top Hubs, Orphan Pages</action>
+  <action>Include visual indicators where useful (e.g., coverage percentage)</action>
+  <action>Suggest actionable next steps based on the statistics</action>
+</step>
+
+</workflow>

@@ -1,0 +1,17 @@
+# Operation Log
+
+<!-- Format for log entries:
+## [timestamp] action | description
+
+Actions: ingest, create, update, link, compare, lint, query
+Each entry should briefly describe what changed and why. -->
+
+## [{{config.project.created}}] create | Project initialized
+
+- Created wiki for **{{config.project.name}}**
+- Domain: {{config.project.domain}}
+- Knowledge organization: {{config.knowledge.organization}}
+- Scale: {{config.knowledge.scale}}
+{{#if config.project.description}}
+- Description: {{config.project.description}}
+{{/if}}

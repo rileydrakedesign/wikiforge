@@ -1,0 +1,19 @@
+# WikiForge Runtime Configuration
+# Agents and skills reference these variables via {variable_name} syntax.
+
+project_name: "{{config.project.name}}"
+project_domain: "{{config.project.domain}}"
+project_description: "{{config.project.description}}"
+user_name: ""                          # Set this to your name
+wiki_root: "wiki"
+raw_root: "raw"
+output_root: "outputs"
+forge_root: ".forge"
+citation_format: "{{config.wiki.citation_format}}"
+cross_ref_style: "{{config.wiki.cross_ref_style}}"
+organization: "{{config.knowledge.organization}}"
+ingestion_style: "{{config.workflows.ingestion_style}}"
+scale: "{{config.knowledge.scale}}"
+frontmatter_enabled: {{config.wiki.frontmatter}}
+log_file: "wiki/log.md"
+index_file: "wiki/index.md"

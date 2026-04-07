@@ -1,0 +1,77 @@
+---
+type: entity
+title: "{{title}}"
+aliases:
+  - "{{title}}"
+tags:
+{{#each tags}}
+  - "{{this}}"
+{{/each}}
+{{#unless tags}}
+  - "uncategorized"
+{{/unless}}
+first_mentioned: "{{first_mentioned}}"
+source_count: {{source_count}}
+last_updated: "{{last_updated}}"
+confidence: {{confidence}}
+---
+
+# {{title}}
+
+## Overview
+
+{{#if summary}}
+{{summary}}
+{{else}}
+<!-- Write a 2-3 sentence overview of this entity. -->
+{{/if}}
+
+## Key Details
+
+{{#if details}}
+{{#each details}}
+- **{{this.label}}**: {{this.value}}
+{{/each}}
+{{else}}
+<!-- Add key attributes as bullet points. Example:
+- **Type**: Organization
+- **Founded**: 2020
+- **Location**: San Francisco, CA
+-->
+{{/if}}
+
+## Sources
+
+{{#if sources}}
+{{#each sources}}
+- [{{this.title}}]({{this.path}}){{#if this.date}} ({{this.date}}){{/if}}
+{{/each}}
+{{else}}
+<!-- Link to source summaries that mention this entity.
+- [[source-summary-filename]] — relevant detail
+-->
+{{/if}}
+
+## Related Entities
+
+{{#if related_entities}}
+{{#each related_entities}}
+- [[{{this.name}}]]{{#if this.relationship}} — {{this.relationship}}{{/if}}
+{{/each}}
+{{else}}
+<!-- Link to related entity pages.
+- [[Entity Name]] — relationship description
+-->
+{{/if}}
+
+## Related Concepts
+
+{{#if related_concepts}}
+{{#each related_concepts}}
+- [[{{this.name}}]]{{#if this.relevance}} — {{this.relevance}}{{/if}}
+{{/each}}
+{{else}}
+<!-- Link to related concept pages.
+- [[Concept Name]] — how it relates
+-->
+{{/if}}

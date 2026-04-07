@@ -1,0 +1,45 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Generate Slides
+
+## Goal
+Create a Marp-formatted slide deck from content in the {{config.project.name}} wiki.
+
+<workflow>
+
+<step n="1" goal="Determine slide deck parameters">
+  <action>Ask the user for: topic/scope, target audience, desired number of slides, presentation style (overview, deep-dive, comparison)</action>
+  <check if="user did not specify scope">
+    <action>Suggest a scope based on `wiki/overview.md` key themes</action>
+  </check>
+</step>
+
+<step n="2" goal="Gather content from wiki">
+  <action>Identify relevant wiki pages based on the specified scope</action>
+  <action>Read each page and extract key points suitable for slides</action>
+  <action>Prioritize high-confidence claims and well-sourced information</action>
+</step>
+
+<step n="3" goal="Create slide outline">
+  <action>Draft a slide-by-slide outline: title slide, agenda, content slides, summary, references</action>
+  <action>Each content slide: title, 3-5 bullet points, optional speaker notes</action>
+  <action>Present outline to user for approval</action>
+</step>
+
+<step n="4" goal="Write Marp-formatted slides">
+  <action>Write the slide deck in Marp markdown format:</action>
+  <action>Use `---` to separate slides</action>
+  <action>Use `marp: true` in YAML frontmatter</action>
+  <action>Keep slides concise: title + 3-5 bullets maximum per slide</action>
+  <action>Add speaker notes with {{config.wiki.cross_ref_style}} citations to wiki pages</action>
+</step>
+
+<step n="5" goal="Save and report">
+  <action>Save to `outputs/slides/{topic-slug}.md`</action>
+  <action>Log the slide generation in `wiki/log.md`</action>
+  <action>Report: number of slides, wiki pages referenced, any content gaps noted</action>
+</step>
+
+</workflow>

@@ -1,0 +1,64 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Batch Ingest
+
+## Goal
+Process multiple sources into the {{config.project.name}} wiki in a single session. Batch ingestion trades human-in-the-loop review for throughput — you process many sources with less supervision, then review the cumulative result.
+
+<workflow>
+
+<step n="1" goal="Scan and catalog sources">
+  <action>Scan `raw/` for files not yet represented in `wiki/sources/`</action>
+  <action>If the user provided a list, use that instead</action>
+  <action>For each source, identify: filename, source type, estimated complexity</action>
+  <action>Present the list to the user for confirmation before proceeding</action>
+</step>
+
+<step n="2" goal="Confirm processing order">
+  <action>Sort sources by type and complexity</action>
+  <action>Present the processing order and ask the user to confirm or adjust</action>
+  <action>Note the total count and estimated scope</action>
+</step>
+
+<step n="3" goal="Process each source">
+  <action>For each source in the confirmed list, execute the `wforge-ingest-source` workflow</action>
+  <action>Track progress: sources processed, pages created, pages updated, contradictions found</action>
+  <action>If a source fails to process, log the error and continue with the next source</action>
+</step>
+
+<step n="4" goal="Cross-reference across batch">
+  <action>After all individual ingestions, scan for cross-references between sources in this batch</action>
+  <action>Add {{config.wiki.cross_ref_style}} links between related pages from different sources</action>
+  <action>Look for emergent patterns or themes across the batch — batch ingestion often reveals connections that single-source ingestion misses</action>
+</step>
+
+<step n="5" goal="Update overview">
+  <action>Read `wiki/overview.md` and update it to reflect the batch</action>
+  <action>Update Key Themes based on patterns that emerged across this batch</action>
+  <action>Update or check off Open Questions that the batch addressed</action>
+  <action>Add new open questions raised by the batch</action>
+  <action>Update the Evolving Synthesis if the batch significantly changed the big picture</action>
+  <action>Update Statistics with current page counts</action>
+</step>
+
+<step n="6" goal="Rebuild index">
+  <action>Rebuild `wiki/index.md` to incorporate all new pages from the batch</action>
+  <action>Organize according to {{config.knowledge.organization}} structure</action>
+{{#if (includes config.workflows.tools "qmd")}}
+  <action>Run `qmd update && qmd embed` to rebuild search index and embeddings</action>
+{{/if}}
+</step>
+
+<step n="7" goal="Batch report">
+  <action>Summarize the full batch: total sources processed, pages created, pages updated, contradictions found</action>
+  <action>List all new pages by category</action>
+  <action>Highlight any cross-batch patterns or themes discovered</action>
+  <action>Note any sources that failed and why</action>
+  <action>Note changes to `wiki/overview.md`</action>
+  <action>Suggest next steps: lint pass, adversarial review, or additional sources to seek</action>
+  <action>The wiki has compounded — each source in this batch built on the ones before it, and the cumulative result is richer than the sum of individual ingestions</action>
+</step>
+
+</workflow>

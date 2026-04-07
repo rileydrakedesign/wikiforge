@@ -1,0 +1,50 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Reindex
+
+## Goal
+Rebuild the {{config.project.name}} wiki index and verify taxonomy integrity.
+
+<workflow>
+
+<step n="1" goal="Scan all wiki pages">
+  <action>Walk the filesystem under `wiki/` and catalog every .md file</action>
+  <action>For each page, read frontmatter to extract: type, title, tags, last_updated, source_count</action>
+  <action>Build an in-memory catalog of all pages with their metadata</action>
+</step>
+
+<step n="2" goal="Categorize pages">
+  <action>Group pages by type: entities, concepts, sources, comparisons</action>
+  <action>Within each group, sort according to {{config.knowledge.organization}} style:</action>
+  <action>entity-first: alphabetical by title | topic-first: by primary tag | chronological: by date | thesis-driven: by confidence level</action>
+</step>
+
+<step n="3" goal="Detect naming issues">
+  <action>Check for duplicate pages (same entity/concept with different filenames)</action>
+  <action>Check for inconsistent naming conventions (mixed case, inconsistent slugification)</action>
+  <action>Flag naming conflicts for the user to resolve</action>
+</step>
+
+<step n="4" goal="Verify cross-references">
+  <action>Scan all {{config.wiki.cross_ref_style}} links across the wiki</action>
+  <action>Verify every link target exists</action>
+  <action>Flag broken links and suggest fixes</action>
+</step>
+
+<step n="5" goal="Rebuild index.md">
+  <action>Generate a fresh `wiki/index.md` from the catalog</action>
+  <action>Include: page count per category, one-line descriptions, {{config.wiki.cross_ref_style}} links</action>
+  <action>Add summary statistics at the top: total pages, total sources, last updated date</action>
+</step>
+
+<step n="6" goal="Log and report">
+  <action>Append a reindex entry to `wiki/log.md` with: pages indexed, issues found, changes made</action>
+{{#if (includes config.workflows.tools "qmd")}}
+  <action>Run `qmd update` to refresh the search index</action>
+{{/if}}
+  <action>Report summary: pages indexed, naming issues, broken links, changes to index</action>
+</step>
+
+</workflow>

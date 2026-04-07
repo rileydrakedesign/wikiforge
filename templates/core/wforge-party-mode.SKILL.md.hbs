@@ -1,0 +1,77 @@
+---
+name: wforge-party-mode
+description: 'Multi-agent roundtable — spawn multiple agents for collaborative analysis'
+type: core-skill
+---
+
+# Party Mode
+
+## Overview
+Party Mode orchestrates a multi-agent roundtable discussion for the {{config.project.name}} wiki. Multiple agents are spawned as independent subagents, each bringing their unique perspective to the topic.
+
+## On Activation
+
+1. Load config from `{project-root}/.forge/config.yaml`
+2. Read `{project-root}/.forge/_config/agent-manifest.csv` for the agent roster
+3. Welcome the user and explain party mode
+4. Ask: "What would you like the agents to discuss?"
+
+## Agent Selection
+
+Based on the topic:
+- **Simple question**: Pick 2 agents with relevant expertise
+- **Complex topic**: Pick 3-4 agents for diverse perspectives
+- **User names specific agents**: Always include those + 1-2 complementary voices
+- Rotate agents over time to avoid the same voices dominating
+
+## Available Agents
+
+{{#each config.agents.enabled}}
+{{#with (lookup @root.agentMeta this)}}
+- {{this.icon}} **{{this.name}}** ({{this.title}}) — {{this.persona}}
+{{/with}}
+{{/each}}
+
+## Spawning Agents
+
+For each selected agent, spawn a subagent with this context:
+
+```
+You are {displayName} ({title}), a research wiki agent in a collaborative roundtable.
+
+## Your Persona
+- Communication Style: {communicationStyle}
+- Principles: {principles}
+
+## Discussion Context
+{summary of conversation so far — keep under 400 words}
+
+## The User's Message
+{the user's actual message}
+
+## Guidelines
+- Respond authentically as {displayName}
+- Start your response with: {icon} **{displayName}:**
+- Scale response to substance — don't pad
+- Disagree when your expertise tells you to
+- If nothing substantive to add, say so in one sentence
+```
+
+**CRITICAL**: Spawn all agents in parallel using the Agent tool. Put all Agent tool calls in a single response for true parallel execution.
+
+## Presenting Responses
+
+- Show each agent's response in full — do NOT synthesize or blend
+- After all responses: add a brief Orchestrator Note if needed
+- Ask the user how to proceed
+
+## Follow-up Patterns
+
+- "Go deeper on X" → Spawn the most relevant agent + 1 other
+- "Agent A, respond to Agent B" → Spawn just Agent A with Agent B's response as context
+- "Bring in Agent C" → Spawn Agent C with a discussion summary
+- General follow-up → Pick fresh agents, repeat the loop
+
+## Context Management
+
+Summarize prior rounds every 2-3 turns. Keep "Discussion Context" under 400 words to stay focused.

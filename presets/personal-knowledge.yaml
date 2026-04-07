@@ -1,0 +1,35 @@
+version: 1
+project:
+  name: "personal-knowledge"
+  domain: ""
+  description: "Personal knowledge base for learning and reference"
+  created: ""
+
+knowledge:
+  source_types:
+    - articles
+    - videos
+    - podcasts
+  organization: entity-first
+  scale: small
+
+agents:
+  tool: claude-code
+  enabled:
+    - ingestion
+    - query
+    - lint
+  party_mode: false
+
+workflows:
+  ingestion_style: deliberate
+  outputs:
+    - markdown
+    - obsidian
+  tools:
+    - search
+
+wiki:
+  frontmatter: true
+  citation_format: inline
+  cross_ref_style: wikilink

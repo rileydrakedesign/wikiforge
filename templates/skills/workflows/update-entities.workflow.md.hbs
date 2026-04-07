@@ -1,0 +1,47 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Update Entities
+
+## Goal
+Create or update entity pages in the {{config.project.name}} wiki from recently ingested sources.
+
+<workflow>
+
+<step n="1" goal="Identify entities needing updates">
+  <action>Review recent entries in `wiki/log.md` to find sources ingested since the last entity update</action>
+  <action>Read source summary pages in `wiki/sources/` for those recent ingestions</action>
+  <action>Compile a list of all entities mentioned across those sources</action>
+</step>
+
+<step n="2" goal="Audit existing entity pages">
+  <action>For each identified entity, check if `wiki/entities/{entity-slug}.md` exists</action>
+  <action>If it exists, read the current content and note what information is already present</action>
+  <action>Categorize entities: needs-creation, needs-update, already-current</action>
+</step>
+
+<step n="3" goal="Create missing entity pages">
+  <action>For each entity that needs creation, use the entity-page template from `.forge/templates/`</action>
+  <action>Include: description based on source material, all relevant citations, relationships to other entities</action>
+{{#if config.wiki.frontmatter}}
+  <action>Set frontmatter: type: entity, title, aliases, tags, first_mentioned, source_count: 1, confidence: high</action>
+{{/if}}
+</step>
+
+<step n="4" goal="Update existing entity pages">
+  <action>For each entity that needs updating, add new information from recent sources</action>
+  <action>Add citations to the new source(s) using {{config.wiki.citation_format}} format</action>
+  <action>Update source_count and last_updated in frontmatter</action>
+  <action>Preserve existing content — append or annotate, do not overwrite</action>
+  <action>Flag any contradictions with existing content</action>
+</step>
+
+<step n="5" goal="Cross-reference and index">
+  <action>Add {{config.wiki.cross_ref_style}} links between new/updated entity pages and related pages</action>
+  <action>Ensure bidirectional linking</action>
+  <action>Update `wiki/index.md` with any new entity entries</action>
+  <action>Log the update session in `wiki/log.md`</action>
+</step>
+
+</workflow>

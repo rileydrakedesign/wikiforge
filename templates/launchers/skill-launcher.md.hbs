@@ -1,0 +1,14 @@
+---
+description: '{{skill.name}} — {{skill.description}}'
+---
+
+<skill-activation>
+{{#if (eq skill.phase "core")}}
+1. LOAD the FULL skill file from {project-root}/.forge/core/{{skill.slug}}/SKILL.md
+{{else}}
+1. LOAD the FULL skill file from {project-root}/.forge/skills/{{skill.phase}}/{{skill.slug}}/SKILL.md
+{{/if}}
+2. READ its entire contents and follow the instructions
+3. LOAD runtime config from {project-root}/.forge/config.yaml
+4. Execute the workflow as specified
+</skill-activation>

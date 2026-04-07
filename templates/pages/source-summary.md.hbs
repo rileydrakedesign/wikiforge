@@ -1,0 +1,79 @@
+---
+type: source
+title: "{{title}}"
+author: "{{author}}"
+date: "{{date}}"
+url: "{{url}}"
+source_type: "{{source_type}}"
+content_hash: "{{content_hash}}"
+ingested_at: "{{ingested_at}}"
+status: "{{status}}"
+---
+
+# {{title}}
+
+{{#if author}}**Author**: {{author}}{{/if}}
+{{#if date}}**Date**: {{date}}{{/if}}
+{{#if source_type}}**Type**: {{source_type}}{{/if}}
+{{#if url}}**URL**: [{{url}}]({{url}}){{/if}}
+
+## Summary
+
+{{#if summary}}
+{{summary}}
+{{else}}
+<!-- Write a 3-5 sentence summary of this source. -->
+{{/if}}
+
+## Key Takeaways
+
+{{#if takeaways}}
+{{#each takeaways}}
+{{@index}}. {{this}}
+{{/each}}
+{{else}}
+<!-- List the most important points from this source.
+1. First key takeaway
+2. Second key takeaway
+3. Third key takeaway
+-->
+{{/if}}
+
+## Entities Mentioned
+
+{{#if entities}}
+{{#each entities}}
+- [[{{this.name}}]]{{#if this.context}} — {{this.context}}{{/if}}
+{{/each}}
+{{else}}
+<!-- List entities (people, organizations, tools, etc.) mentioned in this source.
+- [[Entity Name]] — context of mention
+-->
+{{/if}}
+
+## Concepts Introduced
+
+{{#if concepts}}
+{{#each concepts}}
+- [[{{this.name}}]]{{#if this.context}} — {{this.context}}{{/if}}
+{{/each}}
+{{else}}
+<!-- List concepts discussed or introduced by this source.
+- [[Concept Name]] — how it was discussed
+-->
+{{/if}}
+
+## Notable Quotes
+
+{{#if quotes}}
+{{#each quotes}}
+> "{{this.text}}"
+{{#if this.page}} — p. {{this.page}}{{/if}}
+
+{{/each}}
+{{else}}
+<!-- Add notable quotes from this source.
+> "Quote text here."
+> — p. 42
+-->
+{{/if}}

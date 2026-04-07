@@ -1,0 +1,68 @@
+---
+name: wforge-help
+description: 'Navigate the wiki system — see available agents, skills, and recommended next actions'
+type: core-skill
+---
+
+# WikiForge Help
+
+## Overview
+This skill helps you navigate the {{config.project.name}} research wiki system. It shows available agents and skills, detects what phase you're in, and recommends what to do next.
+
+## On Activation
+
+1. Load config from `{project-root}/.forge/config.yaml`
+2. Read `{project-root}/.forge/_config/skill-manifest.csv` for available skills
+3. Read `{project-root}/.forge/_config/agent-manifest.csv` for available agents
+4. Assess wiki state (see Phase Detection below)
+5. Present recommendations
+
+## Phase Detection
+
+Determine the current state of the wiki:
+
+1. **Check `wiki/log.md`** — how many ingestions, queries, lint passes have occurred?
+2. **Count pages** — how many entities, concepts, source summaries exist?
+3. **Check `raw/`** — are there un-ingested sources waiting?
+
+Based on state, recommend the appropriate phase:
+
+### Empty Wiki (no source summaries)
+> "Your wiki is empty. Start by ingesting your first source."
+- Recommend: **wforge-ingest-source** or **wforge-batch-ingest**
+- Show: Ingestion Agent (Iris) for guided ingestion
+
+### Sources Ingested, Few Cross-References
+> "You have sources ingested but the wiki could use better cross-referencing."
+- Recommend: **wforge-cross-reference**, **wforge-update-entities**, **wforge-update-concepts**
+- Show: Librarian Agent (Leo) for organization
+
+### Rich Wiki (many pages, good coverage)
+> "Your wiki has good coverage. Time for analysis and synthesis."
+- Recommend: **wforge-query-wiki**, **wforge-generate-comparison**, **wforge-adversarial-review**
+- Show: Query Agent (Quinn), Analysis Agent (Axel), Debate Agent (Diana)
+
+### Always Available
+- **wforge-lint-wiki** — health check the wiki
+- **wforge-stats** — view wiki statistics
+{{#if config.agents.party_mode}}
+- **wforge-party-mode** — multi-agent roundtable discussion
+{{/if}}
+
+## Available Agents
+
+{{#each config.agents.enabled}}
+{{#with (lookup @root.agentMeta this)}}
+- **{{this.icon}} {{this.name}}** ({{this.title}}) — {{this.description}}
+{{/with}}
+{{/each}}
+
+## Research Lifecycle Phases
+
+| Phase | Skills | Purpose |
+|-------|--------|---------|
+| 1. Acquisition | ingest-source, batch-ingest, web-research | Bring new sources into the wiki |
+| 2. Compilation | update-entities, update-concepts, cross-reference | Build and maintain wiki pages |
+| 3. Analysis | query-wiki, generate-comparison, adversarial-review | Extract insights from the wiki |
+| 4. Synthesis | compile-output, generate-slides, export-report | Create deliverables from wiki content |
+| Maintenance | lint-wiki, reindex, stats | Keep the wiki healthy |

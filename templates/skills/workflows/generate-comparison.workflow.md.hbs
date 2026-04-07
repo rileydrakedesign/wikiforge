@@ -1,0 +1,47 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Generate Comparison
+
+## Goal
+Build a structured comparison between entities or concepts in the {{config.project.name}} wiki.
+
+<workflow>
+
+<step n="1" goal="Identify comparison subjects">
+  <action>Determine which entities or concepts the user wants to compare</action>
+  <action>Verify that wiki pages exist for each subject</action>
+  <check if="a subject page does not exist">
+    <action>Warn the user and ask if they want to proceed with available information</action>
+  </check>
+</step>
+
+<step n="2" goal="Determine comparison dimensions">
+  <action>Based on the subjects and domain, identify the most meaningful comparison attributes</action>
+  <action>Present the proposed dimensions to the user for confirmation</action>
+  <action>Read all relevant wiki pages to gather data for each dimension</action>
+</step>
+
+<step n="3" goal="Build comparison table">
+  <action>Create a markdown table with subjects as columns and attributes as rows</action>
+  <action>Fill in data from wiki pages, citing sources for each cell</action>
+  <action>Mark cells where data is missing or uncertain</action>
+</step>
+
+<step n="4" goal="Write analysis">
+  <action>Below the table, write a narrative analysis of key differences and similarities</action>
+  <action>Highlight surprising findings or important distinctions</action>
+  <action>Note where data gaps limit the comparison</action>
+</step>
+
+<step n="5" goal="Save and index">
+  <action>Save to `wiki/comparisons/{subject-a}-vs-{subject-b}.md` using the comparison-table template</action>
+{{#if config.wiki.frontmatter}}
+  <action>Include frontmatter: type: comparison, subjects list, created date, source_count</action>
+{{/if}}
+  <action>Add the comparison to `wiki/index.md` under the Comparisons category</action>
+  <action>Log the comparison in `wiki/log.md`</action>
+</step>
+
+</workflow>

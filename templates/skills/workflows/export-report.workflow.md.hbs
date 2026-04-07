@@ -1,0 +1,44 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Export Report
+
+## Goal
+Export a structured report from the {{config.project.name}} wiki as a standalone document.
+
+<workflow>
+
+<step n="1" goal="Determine report parameters">
+  <action>Ask the user for: report topic/scope, format (PDF-ready markdown or plain markdown), audience level (technical, executive, general), desired sections</action>
+  <check if="user did not specify sections">
+    <action>Propose a standard structure: Executive Summary, Background, Key Findings, Analysis, Conclusions, References</action>
+  </check>
+</step>
+
+<step n="2" goal="Gather and organize content">
+  <action>Identify all relevant wiki pages within the specified scope</action>
+  <action>Read each page, extracting content organized by the report sections</action>
+  <action>Track confidence levels and source backing for each claim</action>
+</step>
+
+<step n="3" goal="Write report">
+  <action>Write the full report following the approved section structure</action>
+  <action>Adapt tone and depth to the target audience</action>
+  <action>Include inline citations using {{config.wiki.citation_format}} format</action>
+  <action>Note any disputed or low-confidence claims transparently</action>
+</step>
+
+<step n="4" goal="Add references and appendices">
+  <action>Add a complete references section listing all wiki sources used</action>
+  <action>Include an appendix with methodology notes (which wiki pages were consulted, when the wiki was last updated)</action>
+  <action>Note any knowledge gaps that limited the report</action>
+</step>
+
+<step n="5" goal="Save and report">
+  <action>Save to `outputs/reports/{topic-slug}.md`</action>
+  <action>Log the export in `wiki/log.md`</action>
+  <action>Report: sections written, wiki pages referenced, gaps identified</action>
+</step>
+
+</workflow>

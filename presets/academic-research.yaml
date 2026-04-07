@@ -1,0 +1,39 @@
+version: 1
+project:
+  name: "academic-research"
+  domain: ""
+  description: "Academic research knowledge base with paper-focused ingestion"
+  created: ""
+
+knowledge:
+  source_types:
+    - papers
+    - articles
+    - books
+  organization: thesis-driven
+  scale: medium
+
+agents:
+  tool: claude-code
+  enabled:
+    - ingestion
+    - query
+    - lint
+    - research
+    - debate
+    - librarian
+  party_mode: false
+
+workflows:
+  ingestion_style: deliberate
+  outputs:
+    - markdown
+    - obsidian
+  tools:
+    - search
+    - stats
+
+wiki:
+  frontmatter: true
+  citation_format: academic
+  cross_ref_style: wikilink

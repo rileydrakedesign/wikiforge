@@ -1,0 +1,179 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Ingest Source
+
+## Goal
+Process a single source into the {{config.project.name}} wiki — convert, extract, summarize, cross-reference, and log. This is the most critical operation in the wiki: every source you ingest makes the wiki richer, its cross-references denser, and its synthesis more complete. The wiki is a compounding artifact — each ingestion builds on everything that came before.
+
+## Core Principle
+The wiki is NOT RAG. You are not chunking documents for retrieval. You are **compiling** knowledge — reading the source, extracting its meaning, and weaving it into the existing wiki so the knowledge is built up once and kept current. A single source might touch 10-15 wiki pages.
+
+<workflow>
+
+<step n="1" goal="Identify and classify the source">
+  <action>Determine what kind of source was provided (file path, URL, or already-converted markdown)</action>
+  <action>Classify it against the configured source types: {{#each config.knowledge.source_types}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</action>
+  <check if="source type is not in the configured list">
+    <action>Warn the user but proceed with ingestion</action>
+  </check>
+</step>
+
+<step n="2" goal="Convert source to markdown if needed">
+  <check if="source is already a .md file in raw/">
+    <goto anchor="frontmatter" />
+  </check>
+  <check if="source is a PDF">
+    <action>Run `.forge/tools/pdf-to-md.py` to convert. Preserve tables and structure</action>
+  </check>
+  <check if="source is a URL or web page">
+    <action>Fetch the content and convert to clean markdown. Strip navigation, ads, boilerplate</action>
+    <action>Download images to `raw/assets/` and rewrite image refs to local paths — URLs break over time, local copies don't</action>
+  </check>
+  <check if="source is audio (podcast, meeting recording)">
+    <action>Run `.forge/tools/transcribe.sh` to transcribe via Whisper</action>
+  </check>
+  <check if="source is video (YouTube, lecture)">
+    <action>Try `yt-dlp` for existing transcripts first. Fall back to Whisper transcription</action>
+  </check>
+  <check if="source is a code repository">
+    <action>Generate a summary markdown capturing architecture, key files, and purpose</action>
+  </check>
+  <check if="source is a data file (CSV, JSON)">
+    <action>Generate descriptive markdown with schema, row counts, and sample data as tables</action>
+  </check>
+  <action>Save the converted file to `raw/{source_type}/{slug}.md` with a descriptive kebab-case filename</action>
+</step>
+
+<anchor id="frontmatter" />
+<step n="3" goal="Ensure YAML frontmatter is present">
+{{#if config.wiki.frontmatter}}
+  <action>Verify or add YAML frontmatter to the source file:</action>
+  <action>Required fields: title, source_type, original_path, content_hash (SHA-256, first 16 chars), ingested_at (ISO timestamp), status: processed, tags: []</action>
+  <action>The content_hash enables staleness detection — if a source is updated and re-ingested, the hash mismatch signals that wiki pages derived from it may need recompilation</action>
+  <check if="frontmatter exists with status: raw">
+    <action>Update status to `processed`</action>
+  </check>
+{{else}}
+  <action>Frontmatter is disabled for this project. Ensure the filename is descriptive and skip this step</action>
+{{/if}}
+</step>
+
+<step n="4" goal="Read source and extract knowledge">
+  <action>Read the full markdown source carefully</action>
+  <check if="source references images">
+    <action>Read the text first, then view each referenced image separately for additional context — LLMs can't natively read markdown with inline images in one pass, so use this two-pass approach</action>
+  </check>
+  <action>Extract entities: people, organizations, tools, products, places — anything with a proper name</action>
+  <action>Extract concepts: ideas, methodologies, theories, techniques, patterns</action>
+  <action>Extract claims: specific assertions or findings that can be evaluated</action>
+  <action>Note relationships: how entities and concepts connect to each other and to what is already in the wiki</action>
+  <action>Note key quotes: notable passages worth preserving verbatim with attribution</action>
+</step>
+
+{{#if (eq config.workflows.ingestion_style "deliberate")}}
+<step n="4b" goal="Discuss extraction with user (deliberate mode)">
+  <critical>STOP and present your extraction to the user before proceeding. This is deliberate ingestion — the human curates sources and guides emphasis, the LLM does the bookkeeping.</critical>
+  <action>Present a structured summary of what you extracted: key entities, key concepts, notable claims, relationships to existing wiki content, and any surprises</action>
+  <action>Ask the user: "What should I emphasize? Anything to skip or explore further?"</action>
+  <action>WAIT for user input. Do NOT proceed to page creation until the user confirms or adjusts</action>
+  <action>Incorporate the user's guidance into how you write the summary and which entities/concepts get pages</action>
+</step>
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "batch")}}
+<step n="4b" goal="Brief extraction summary (batch mode)">
+  <action>Present a brief summary of key findings (3-5 bullets) but proceed without waiting for user confirmation</action>
+</step>
+{{/if}}
+
+<step n="5" goal="Create source summary page">
+  <action>Create `wiki/sources/{slug}.md` using the source-summary template from `.forge/templates/`</action>
+{{#if config.wiki.frontmatter}}
+  <action>Include frontmatter: title, type: source, original path, date_added, last_updated, confidence: high, entities list, concepts list, content_hash</action>
+{{/if}}
+  <action>Write a concise summary (3-8 paragraphs) covering the source's main arguments and contributions</action>
+  <action>List key takeaways as a numbered list</action>
+  <action>List all extracted entities and concepts at the bottom with {{config.wiki.cross_ref_style}} links to their wiki pages</action>
+  <action>Include notable quotes with attribution</action>
+  <action>Use {{config.wiki.citation_format}} citation format throughout</action>
+</step>
+
+<step n="6" goal="Update entity pages">
+  <action>For each extracted entity, check if a page exists at `wiki/entities/{entity-slug}.md`</action>
+  <check if="entity page exists">
+    <action>Add new information from this source. Add a citation back to the source summary. Update last_updated and source_count in frontmatter</action>
+    <action>Strengthen or revise existing descriptions based on what this source adds — the wiki should reflect everything ingested, not just the latest source</action>
+  </check>
+  <check if="entity page does not exist">
+    <action>Create it using the entity-page template from `.forge/templates/`. Include initial information, sources section, and relationships to other entities already in the wiki</action>
+  </check>
+</step>
+
+<step n="7" goal="Update concept pages">
+  <action>For each extracted concept, check if a page exists at `wiki/concepts/{concept-slug}.md`</action>
+  <check if="concept page exists">
+    <action>Merge new information. Note whether this source agrees with, extends, or contradicts existing content</action>
+    <action>If the source adds nuance, update the definition or key ideas — the wiki's synthesis should reflect the full picture, not just individual source views</action>
+  </check>
+  <check if="concept page does not exist">
+    <action>Create it using the concept-page template. Include definition, context, related concepts, and source citations</action>
+  </check>
+  <action>Use {{config.wiki.cross_ref_style}} style for all internal links</action>
+</step>
+
+<step n="8" goal="Flag contradictions">
+  <action>Compare claims from this source against existing wiki content</action>
+  <check if="a contradiction is found">
+    <action>Add a WARNING callout on both the new and existing pages</action>
+    <action>Document both positions with their sources — do not silently resolve in favor of either</action>
+    <action>Set confidence: disputed on the affected sections</action>
+    <action>Log the contradiction for later adversarial review</action>
+  </check>
+</step>
+
+<step n="9" goal="Cross-reference pages">
+  <action>Scan all newly created or updated pages for potential links to existing wiki pages</action>
+  <action>Add {{config.wiki.cross_ref_style}} links wherever relevant connections exist — cross-references are pre-built during ingestion, not re-derived at query time</action>
+  <action>Ensure bidirectional linking: if page A references page B, page B should reference page A</action>
+  <action>Link entities that co-occur in this source to each other, even if they aren't directly related in the text</action>
+</step>
+
+<step n="10" goal="Update overview">
+  <action>Read `wiki/overview.md` and assess whether this source changes the big picture</action>
+  <check if="this source introduces a new major theme, shifts an existing theme, or provides significant evidence for/against a listed open question">
+    <action>Update the Key Themes section of `wiki/overview.md` to reflect what this source adds</action>
+    <action>Check off or update any Open Questions that this source addresses</action>
+    <action>Add new open questions that this source raises</action>
+    <action>Update the Statistics section with current page counts</action>
+  </check>
+  <check if="this source is routine and does not change the big picture">
+    <action>Update the Statistics section only</action>
+  </check>
+</step>
+
+<step n="11" goal="Update index and search">
+  <action>Open `wiki/index.md` and add entries for any new pages created</action>
+  <action>Organize entries according to the wiki's {{config.knowledge.organization}} structure</action>
+  <action>Update one-line descriptions for any existing entries whose content has significantly changed</action>
+{{#if (includes config.workflows.tools "qmd")}}
+  <action>Run `qmd update` to refresh the search index with new pages</action>
+{{/if}}
+</step>
+
+<step n="12" goal="Update operation log">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] ingest | Source Title`</action>
+  <action>Include: source type, pages created (list), pages updated (list), entities extracted (count), concepts extracted (count), contradictions found (count), content hash</action>
+</step>
+
+<step n="13" goal="Report to user">
+  <action>Summarize what was done: source converted, pages created, pages updated</action>
+  <action>List all pages touched with their paths</action>
+  <action>Note any contradictions or issues found</action>
+  <action>Note any changes to `wiki/overview.md`</action>
+  <action>Suggest next steps: related sources to ingest, questions worth exploring, or an adversarial review if contradictions were found</action>
+  <action>The wiki is now richer than before this ingestion — the cross-references are already there, the contradictions are already flagged, and the synthesis already reflects this source</action>
+</step>
+
+</workflow>

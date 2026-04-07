@@ -1,0 +1,65 @@
+# .cursorrules — {{config.project.name}}
+
+## Project Identity
+
+- **Domain**: {{config.project.domain}}
+{{#if config.project.description}}
+- **Description**: {{config.project.description}}
+{{/if}}
+- **Knowledge scale**: {{config.knowledge.scale}}
+- **Organization**: {{config.knowledge.organization}}
+
+WikiForge-managed research wiki. Knowledge in `wiki/`, sources in `raw/`,
+agents in `.forge/agents/`, skills in `.forge/skills/`.
+
+## Structure
+
+- `wiki/` — LLM-maintained knowledge (entities, concepts, sources, comparisons)
+- `raw/` — Immutable source documents
+- `outputs/` — Generated deliverables
+- `.forge/agents/` — Agent personas with SKILL.md and capabilities menus
+- `.forge/skills/{phase}/` — Workflows organized by research lifecycle phase
+- `.forge/config.yaml` — Runtime configuration
+- `.forge/_config/` — Manifests (skill, agent, file catalogs)
+- `.cursor/skills/` — IDE launchers
+
+## Available Agents
+
+{{#each config.agents.enabled}}
+{{#with (lookup @root.agentMeta this)}}
+- **{{this.icon}} {{this.name}}** ({{this.title}}) — {{this.description}}
+{{/with}}
+{{/each}}
+
+## Research Lifecycle
+
+1. **Acquisition**: ingest-source, batch-ingest, web-research
+2. **Compilation**: update-entities, update-concepts, cross-reference
+3. **Analysis**: query-wiki, generate-comparison, adversarial-review
+4. **Synthesis**: compile-output, generate-slides, export-report
+5. **Maintenance**: lint-wiki, reindex, stats
+
+## Conventions
+
+| Setting | Value |
+|---------|-------|
+| Citations | {{config.wiki.citation_format}} |
+| Cross-refs | {{config.wiki.cross_ref_style}} |
+| Frontmatter | {{#if config.wiki.frontmatter}}enabled{{else}}disabled{{/if}} |
+| Ingestion style | {{config.workflows.ingestion_style}} |
+| Page templates | `.forge/templates/` |
+
+{{#if (eq config.wiki.cross_ref_style "wikilink")}}
+Use `[[Page Name]]` for internal wiki links.
+{{else}}
+Use `[Page Name](./page-name.md)` for internal wiki links.
+{{/if}}
+
+## Rules
+
+1. Never modify files in `raw/` — they are immutable primary sources
+2. Always cite sources when adding claims to wiki pages
+3. Update `wiki/index.md` and `wiki/log.md` after every operation
+4. Use page templates from `.forge/templates/` when creating new pages
+5. Flag contradictions explicitly rather than silently resolving them
+6. Load `.forge/config.yaml` for runtime settings before operating

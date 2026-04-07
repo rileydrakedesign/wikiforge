@@ -1,0 +1,70 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Query Wiki
+
+## Goal
+Answer the user's question by searching and synthesizing content from the {{config.project.name}} wiki. The wiki is a compiled knowledge base — the cross-references are already built, the contradictions are already flagged, and the synthesis reflects everything ingested. Your job is to navigate this compiled knowledge and give a precise, well-cited answer.
+
+## Core Principle
+Good answers can be filed back into the wiki as new pages. A comparison you create, an analysis you run, a connection you discover — these are valuable and should not disappear into chat history. Your explorations compound in the knowledge base just like ingested sources do.
+
+<workflow>
+
+<step n="1" goal="Parse and understand the question">
+  <action>Identify what the user is asking: factual lookup, comparison, synthesis, exploration, or open-ended investigation</action>
+  <action>Note any specific entities, concepts, or sources mentioned in the question</action>
+  <action>Determine if this requires a single page lookup or multi-page synthesis</action>
+</step>
+
+<step n="2" goal="Locate relevant wiki pages">
+  <action>Read `wiki/index.md` to identify potentially relevant pages — this is the primary navigation tool</action>
+{{#if (includes config.workflows.tools "qmd")}}
+  <action>Use `qmd query "{question}"` for semantic search across wiki pages — finds conceptually related content even when exact keywords don't match</action>
+{{else}}
+  <action>Use `.forge/tools/search.sh "{keywords}"` to find pages containing relevant terms</action>
+{{/if}}
+  <action>Compile a list of relevant pages to read in full</action>
+  <action>Follow {{config.wiki.cross_ref_style}} links between pages to find connected content — the cross-references were built during ingestion precisely for this purpose</action>
+</step>
+
+<step n="3" goal="Gather evidence from wiki pages">
+  <action>Read each relevant page in full</action>
+  <action>Extract: direct answers, supporting evidence, contradictions, confidence levels</action>
+  <action>Note the source backing for each piece of evidence — trace claims back through wiki pages to their original sources</action>
+  <action>Track which pages contributed to the answer</action>
+  <action>Pay attention to pages with `confidence: disputed` — present both sides rather than choosing one</action>
+</step>
+
+<step n="4" goal="Synthesize answer">
+  <action>Compose a clear, structured answer to the user's question</action>
+  <action>Cite specific wiki pages using {{config.wiki.cross_ref_style}} references for every factual claim</action>
+  <action>Clearly separate known (wiki-backed) information from inferred or uncertain information</action>
+  <action>If wiki pages conflict, present both perspectives with their evidence and note the contradiction</action>
+  <action>Use headings and bullet points for readability in longer answers</action>
+  <action>For comparison questions, build a structured table — this is often more useful than prose</action>
+{{#if (includes config.workflows.outputs "marp")}}
+  <action>If the user wants a presentation-ready answer, mention that `wforge-generate-slides` can turn wiki content into a Marp slide deck</action>
+{{/if}}
+</step>
+
+<step n="5" goal="Compound the exploration back into the wiki">
+  <critical>This is a key insight: your explorations should compound in the knowledge base, not disappear into chat history.</critical>
+  <check if="the answer synthesized multiple pages into a novel comparison, analysis, or connection">
+    <action>Offer to save it as a new page: comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`</action>
+    <action>If the user agrees, create the page with proper frontmatter, citations, and cross-references to the pages that contributed</action>
+    <action>Update `wiki/index.md` with the new page</action>
+    <action>Log the query and page creation in `wiki/log.md`</action>
+  </check>
+  <check if="the answer revealed knowledge gaps">
+    <action>Suggest specific sources or topics to ingest that would fill these gaps</action>
+    <action>Note gaps as open questions — offer to add them to `wiki/overview.md`</action>
+  </check>
+  <check if="the answer revealed a contradiction not previously flagged">
+    <action>Offer to flag it on the relevant wiki pages with `confidence: disputed`</action>
+    <action>Suggest running `wforge-adversarial-review` to evaluate the conflicting claims</action>
+  </check>
+</step>
+
+</workflow>

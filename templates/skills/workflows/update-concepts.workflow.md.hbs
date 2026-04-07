@@ -1,0 +1,47 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Update Concepts
+
+## Goal
+Create or update concept pages in the {{config.project.name}} wiki from recently ingested sources.
+
+<workflow>
+
+<step n="1" goal="Identify concepts needing updates">
+  <action>Review recent entries in `wiki/log.md` to find sources ingested since the last concept update</action>
+  <action>Read source summary pages in `wiki/sources/` for those recent ingestions</action>
+  <action>Compile a list of all concepts, theories, frameworks, and methods mentioned</action>
+</step>
+
+<step n="2" goal="Audit existing concept pages">
+  <action>For each identified concept, check if `wiki/concepts/{concept-slug}.md` exists</action>
+  <action>If it exists, read the current content and note what is already covered</action>
+  <action>Categorize concepts: needs-creation, needs-update, already-current</action>
+</step>
+
+<step n="3" goal="Create missing concept pages">
+  <action>For each concept that needs creation, use the concept-page template from `.forge/templates/`</action>
+  <action>Include: clear definition, key ideas, evidence from sources, related concepts</action>
+{{#if config.wiki.frontmatter}}
+  <action>Set frontmatter: type: concept, title, tags, first_mentioned, source_count: 1, confidence: high</action>
+{{/if}}
+</step>
+
+<step n="4" goal="Update existing concept pages">
+  <action>For each concept that needs updating, merge new information from recent sources</action>
+  <action>Note whether new sources agree with, extend, or contradict existing content</action>
+  <action>Add citations using {{config.wiki.citation_format}} format</action>
+  <action>Update source_count and last_updated in frontmatter</action>
+  <action>Flag contradictions explicitly and set confidence: disputed if needed</action>
+</step>
+
+<step n="5" goal="Cross-reference and index">
+  <action>Add {{config.wiki.cross_ref_style}} links between new/updated concept pages and related pages</action>
+  <action>Ensure bidirectional linking with entity pages that reference these concepts</action>
+  <action>Update `wiki/index.md` with any new concept entries</action>
+  <action>Log the update session in `wiki/log.md`</action>
+</step>
+
+</workflow>
