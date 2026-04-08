@@ -1,45 +1,53 @@
-import { input, select } from "@inquirer/prompts";
+import * as p from "@clack/prompts";
 import type {
   AgentTool,
   WikiForgeConfig,
 } from "../config/schema.js";
 import { DEFAULT_CONFIG } from "../config/defaults.js";
+import { handleCancel } from "./ui.js";
 
 /**
  * Quick start mode — minimal questions, sensible defaults.
  */
 export async function runQuickStart(): Promise<WikiForgeConfig> {
-  const projectName = await input({
+  p.log.info("Quick start — just a few questions, sensible defaults for the rest.");
+
+  const projectName = await p.text({
     message: "Project name:",
-    default: DEFAULT_CONFIG.project.name,
+    placeholder: DEFAULT_CONFIG.project.name,
+    defaultValue: DEFAULT_CONFIG.project.name,
   });
+  handleCancel(projectName);
 
-  const domain = await input({
+  const domain = await p.text({
     message: "Research domain/topic:",
+    placeholder: 'e.g., "Agentic AI Systems"',
   });
+  handleCancel(domain);
 
-  const agentTool = await select<AgentTool>({
+  const agentTool = await p.select({
     message: "Primary LLM agent tool:",
-    choices: [
-      { value: "claude-code", name: "Claude Code" },
-      { value: "cursor", name: "Cursor / Windsurf" },
-      { value: "codex", name: "OpenAI Codex" },
-      { value: "generic", name: "Generic" },
+    options: [
+      { value: "claude-code" as AgentTool, label: "Claude Code", hint: "recommended" },
+      { value: "cursor" as AgentTool, label: "Cursor / Windsurf" },
+      { value: "codex" as AgentTool, label: "OpenAI Codex" },
+      { value: "generic" as AgentTool, label: "Generic" },
     ],
   });
+  handleCancel(agentTool);
 
   return {
     ...DEFAULT_CONFIG,
     project: {
       ...DEFAULT_CONFIG.project,
-      name: projectName,
-      domain,
-      description: `A knowledge base for tracking developments in ${domain}`,
+      name: String(projectName),
+      domain: String(domain),
+      description: `A knowledge base for tracking developments in ${String(domain)}`,
       created: new Date().toISOString().split("T")[0],
     },
     agents: {
       ...DEFAULT_CONFIG.agents,
-      tool: agentTool,
+      tool: agentTool as AgentTool,
     },
   };
 }

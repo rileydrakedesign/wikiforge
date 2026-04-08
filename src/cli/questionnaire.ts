@@ -1,9 +1,4 @@
-import {
-  input,
-  select,
-  checkbox,
-  confirm,
-} from "@inquirer/prompts";
+import * as p from "@clack/prompts";
 import type {
   WikiForgeConfig,
   SourceType,
@@ -16,218 +11,307 @@ import type {
   ToolOption,
 } from "../config/schema.js";
 import { DEFAULT_CONFIG } from "../config/defaults.js";
+import { handleCancel } from "./ui.js";
 
 /**
  * Run the full guided questionnaire and return a complete config.
  */
 export async function runQuestionnaire(): Promise<WikiForgeConfig> {
-  // Phase 1: Project Identity
-  const projectName = await input({
+  // ── Phase 1: Project Identity ──────────────────────────────
+
+  p.log.step("Phase 1: Project Identity");
+
+  const projectName = await p.text({
     message: "Project name:",
-    default: DEFAULT_CONFIG.project.name,
+    placeholder: DEFAULT_CONFIG.project.name,
+    defaultValue: DEFAULT_CONFIG.project.name,
   });
+  handleCancel(projectName);
 
-  const domain = await input({
+  const domain = await p.text({
     message: "Research domain/topic:",
-    default: 'e.g., "Agentic AI Systems", "Renaissance Art"',
+    placeholder: 'e.g., "Agentic AI Systems", "Renaissance Art"',
   });
+  handleCancel(domain);
 
-  const description = await input({
+  const description = await p.text({
     message: "One-line description:",
-    default: `A knowledge base for tracking developments in ${domain}`,
+    defaultValue: `A knowledge base for tracking developments in ${String(domain)}`,
+    placeholder: `A knowledge base for tracking developments in ${String(domain)}`,
   });
+  handleCancel(description);
 
-  const initGit = await confirm({
+  const initGit = await p.confirm({
     message: "Initialize git repo?",
-    default: true,
   });
+  handleCancel(initGit);
 
-  // Phase 2: Knowledge Architecture
-  const sourceTypes = await checkbox<SourceType>({
+  // ── Phase 2: Knowledge Architecture ────────────────────────
+
+  p.log.step("Phase 2: Knowledge Architecture");
+
+  const sourceTypes = await p.multiselect({
     message: "Source types you'll be working with:",
-    choices: [
-      { value: "articles", name: "Articles & blog posts", checked: true },
-      { value: "papers", name: "Academic papers (PDF)", checked: true },
-      { value: "books", name: "Books / book chapters" },
-      { value: "podcasts", name: "Podcasts / audio transcripts" },
-      { value: "videos", name: "Video transcripts (YouTube, lectures)" },
-      { value: "code_repos", name: "Code repositories" },
-      { value: "data_files", name: "Data files (CSV, JSON)" },
-      { value: "images", name: "Images / diagrams" },
-      { value: "meeting_notes", name: "Meeting notes / transcripts" },
-      { value: "social_media", name: "Social media threads" },
+    options: [
+      { value: "articles" as SourceType, label: "Articles & blog posts" },
+      { value: "papers" as SourceType, label: "Academic papers (PDF)" },
+      { value: "books" as SourceType, label: "Books / book chapters" },
+      { value: "podcasts" as SourceType, label: "Podcasts / audio transcripts" },
+      { value: "videos" as SourceType, label: "Video transcripts (YouTube, lectures)" },
+      { value: "code_repos" as SourceType, label: "Code repositories" },
+      { value: "data_files" as SourceType, label: "Data files (CSV, JSON)" },
+      { value: "images" as SourceType, label: "Images / diagrams" },
+      { value: "meeting_notes" as SourceType, label: "Meeting notes / transcripts" },
+      { value: "social_media" as SourceType, label: "Social media threads" },
     ],
+    initialValues: ["articles" as SourceType, "papers" as SourceType],
   });
+  handleCancel(sourceTypes);
 
-  const organization = await select<WikiOrganization>({
+  const organization = await p.select({
     message: "Wiki organization style:",
-    choices: [
+    options: [
       {
-        value: "entity-first",
-        name: "Entity-first (people, orgs, concepts get their own pages)",
+        value: "entity-first" as WikiOrganization,
+        label: "Entity-first",
+        hint: "people, orgs, concepts get their own pages",
       },
       {
-        value: "topic-first",
-        name: "Topic-first (broad topics with sub-sections)",
+        value: "topic-first" as WikiOrganization,
+        label: "Topic-first",
+        hint: "broad topics with sub-sections",
       },
       {
-        value: "chronological",
-        name: "Chronological (timeline-driven, date-indexed)",
+        value: "chronological" as WikiOrganization,
+        label: "Chronological",
+        hint: "timeline-driven, date-indexed",
       },
       {
-        value: "thesis-driven",
-        name: "Thesis-driven (claims, evidence, counter-evidence)",
+        value: "thesis-driven" as WikiOrganization,
+        label: "Thesis-driven",
+        hint: "claims, evidence, counter-evidence",
       },
-      { value: "custom", name: "Custom (define your own categories later)" },
+      {
+        value: "custom" as WikiOrganization,
+        label: "Custom",
+        hint: "define your own categories later",
+      },
     ],
   });
+  handleCancel(organization);
 
-  const scale = await select<ProjectScale>({
+  const scale = await p.select({
     message: "Expected scale:",
-    choices: [
-      { value: "small", name: "Small (< 50 sources, personal project)" },
-      { value: "medium", name: "Medium (50-200 sources, serious research)" },
-      { value: "large", name: "Large (200+ sources, long-running project)" },
+    options: [
+      {
+        value: "small" as ProjectScale,
+        label: "Small",
+        hint: "< 50 sources, personal project",
+      },
+      {
+        value: "medium" as ProjectScale,
+        label: "Medium",
+        hint: "50-200 sources, serious research",
+      },
+      {
+        value: "large" as ProjectScale,
+        label: "Large",
+        hint: "200+ sources, long-running project",
+      },
     ],
   });
+  handleCancel(scale);
 
-  // Phase 3: Agent Configuration
-  const agentTool = await select<AgentTool>({
+  // ── Phase 3: Agent Configuration ───────────────────────────
+
+  p.log.step("Phase 3: Agent Configuration");
+
+  const agentTool = await p.select({
     message: "Primary LLM agent tool:",
-    choices: [
-      { value: "claude-code", name: "Claude Code (generates CLAUDE.md)" },
-      { value: "cursor", name: "Cursor / Windsurf (generates .cursorrules)" },
-      { value: "codex", name: "OpenAI Codex (generates AGENTS.md)" },
-      { value: "generic", name: "Generic (generates all schema files)" },
+    options: [
+      {
+        value: "claude-code" as AgentTool,
+        label: "Claude Code",
+        hint: "generates CLAUDE.md",
+      },
+      {
+        value: "cursor" as AgentTool,
+        label: "Cursor / Windsurf",
+        hint: "generates .cursorrules",
+      },
+      {
+        value: "codex" as AgentTool,
+        label: "OpenAI Codex",
+        hint: "generates AGENTS.md",
+      },
+      {
+        value: "generic" as AgentTool,
+        label: "Generic",
+        hint: "generates all schema files",
+      },
     ],
   });
+  handleCancel(agentTool);
 
-  const agents = await checkbox<AgentType>({
+  const agents = await p.multiselect({
     message: "Research agents to include:",
-    choices: [
+    options: [
       {
-        value: "ingestion",
-        name: "Ingestion Agent — reads sources, updates wiki",
-        checked: true,
+        value: "ingestion" as AgentType,
+        label: "Ingestion Agent (Iris)",
+        hint: "reads sources, updates wiki",
       },
       {
-        value: "query",
-        name: "Query Agent — answers questions from wiki",
-        checked: true,
+        value: "query" as AgentType,
+        label: "Query Agent (Quinn)",
+        hint: "answers questions from wiki",
       },
       {
-        value: "lint",
-        name: "Lint Agent — health-checks wiki consistency",
-        checked: true,
+        value: "lint" as AgentType,
+        label: "Lint Agent (Linus)",
+        hint: "health-checks wiki consistency",
       },
       {
-        value: "research",
-        name: "Research Agent — finds new sources via web search",
+        value: "research" as AgentType,
+        label: "Research Agent (Rex)",
+        hint: "finds new sources via web search",
       },
       {
-        value: "analysis",
-        name: "Analysis Agent — generates comparisons, charts, tables",
+        value: "analysis" as AgentType,
+        label: "Analysis Agent (Axel)",
+        hint: "generates comparisons, charts, tables",
       },
       {
-        value: "debate",
-        name: "Debate Agent — adversarial review of wiki claims",
+        value: "debate" as AgentType,
+        label: "Debate Agent (Diana)",
+        hint: "adversarial review of wiki claims",
       },
       {
-        value: "synthesis",
-        name: "Synthesis Agent — creates output artifacts",
+        value: "synthesis" as AgentType,
+        label: "Synthesis Agent (Sophie)",
+        hint: "creates output artifacts",
       },
       {
-        value: "librarian",
-        name: "Librarian Agent — manages index, taxonomy",
+        value: "librarian" as AgentType,
+        label: "Librarian Agent (Leo)",
+        hint: "manages index, taxonomy",
       },
     ],
+    initialValues: ["ingestion" as AgentType, "query" as AgentType, "lint" as AgentType],
   });
+  handleCancel(agents);
 
-  const partyMode = await confirm({
-    message: "Enable Party Mode? (multiple agents collaborate in one session)",
-    default: false,
+  const partyMode = await p.confirm({
+    message:
+      "Enable Party Mode? (multiple agents collaborate in one session)",
   });
+  handleCancel(partyMode);
 
-  // Phase 4: Workflow Preferences
-  const ingestionStyle = await select<IngestionStyle>({
+  // ── Phase 4: Workflow Preferences ──────────────────────────
+
+  p.log.step("Phase 4: Workflow Preferences");
+
+  const ingestionStyle = await p.select({
     message: "Ingestion workflow:",
-    choices: [
+    options: [
       {
-        value: "deliberate",
-        name: "Deliberate (one source at a time, human-in-the-loop review)",
+        value: "deliberate" as IngestionStyle,
+        label: "Deliberate",
+        hint: "one source at a time, human-in-the-loop review",
       },
       {
-        value: "batch",
-        name: "Batch (process multiple sources, review after)",
+        value: "batch" as IngestionStyle,
+        label: "Batch",
+        hint: "process multiple sources, review after",
       },
       {
-        value: "autonomous",
-        name: "Autonomous (ingest and update with minimal supervision)",
+        value: "autonomous" as IngestionStyle,
+        label: "Autonomous",
+        hint: "ingest and update with minimal supervision",
       },
     ],
   });
+  handleCancel(ingestionStyle);
 
-  const outputs = await checkbox<OutputFormat>({
+  const outputs = await p.multiselect({
     message: "Output formats to support:",
-    choices: [
-      { value: "markdown", name: "Markdown pages", checked: true },
-      { value: "marp", name: "Marp slide decks" },
-      { value: "matplotlib", name: "Matplotlib/chart generation" },
-      { value: "pdf", name: "PDF reports" },
+    options: [
+      { value: "markdown" as OutputFormat, label: "Markdown pages" },
+      { value: "marp" as OutputFormat, label: "Marp slide decks" },
+      { value: "matplotlib" as OutputFormat, label: "Matplotlib/chart generation" },
+      { value: "pdf" as OutputFormat, label: "PDF reports" },
       {
-        value: "obsidian",
-        name: "Obsidian-optimized (wiki links, graph view, dataview)",
+        value: "obsidian" as OutputFormat,
+        label: "Obsidian-optimized",
+        hint: "wiki links, graph view, dataview",
       },
     ],
+    initialValues: ["markdown" as OutputFormat],
   });
+  handleCancel(outputs);
 
-  const tools = await checkbox<ToolOption>({
+  const tools = await p.multiselect({
     message: "Include CLI helper tools?",
-    choices: [
+    options: [
       {
-        value: "search",
-        name: "Search script (grep/ripgrep based wiki search)",
-        checked: true,
+        value: "search" as ToolOption,
+        label: "Search script",
+        hint: "grep/ripgrep based wiki search",
       },
-      { value: "qmd", name: "qmd integration (hybrid BM25/vector search)" },
-      { value: "ingest", name: "Ingest script (batch file processor)" },
-      { value: "stats", name: "Stats script (wiki health dashboard)" },
+      {
+        value: "qmd" as ToolOption,
+        label: "qmd integration",
+        hint: "hybrid BM25/vector search",
+      },
+      {
+        value: "ingest" as ToolOption,
+        label: "Ingest script",
+        hint: "batch file processor",
+      },
+      {
+        value: "stats" as ToolOption,
+        label: "Stats script",
+        hint: "wiki health dashboard",
+      },
     ],
+    initialValues: ["search" as ToolOption],
+    required: false,
   });
+  handleCancel(tools);
 
   const config: WikiForgeConfig = {
     version: 1,
     project: {
-      name: projectName,
-      domain,
-      description,
+      name: String(projectName),
+      domain: String(domain),
+      description: String(description),
       created: new Date().toISOString().split("T")[0],
     },
     knowledge: {
-      source_types: sourceTypes,
-      organization,
-      scale,
+      source_types: sourceTypes as SourceType[],
+      organization: organization as WikiOrganization,
+      scale: scale as ProjectScale,
     },
     agents: {
-      tool: agentTool,
-      enabled: agents,
-      party_mode: partyMode,
+      tool: agentTool as AgentTool,
+      enabled: agents as AgentType[],
+      party_mode: partyMode as boolean,
     },
     workflows: {
-      ingestion_style: ingestionStyle,
-      outputs,
-      tools,
+      ingestion_style: ingestionStyle as IngestionStyle,
+      outputs: outputs as OutputFormat[],
+      tools: tools as ToolOption[],
     },
     wiki: {
       frontmatter: true,
       citation_format: "inline",
-      cross_ref_style: outputs.includes("obsidian")
+      cross_ref_style: (outputs as OutputFormat[]).includes("obsidian")
         ? "wikilink"
         : "markdown-link",
     },
   };
 
-  return { ...config, _initGit: initGit } as WikiForgeConfig & {
+  return { ...config, _initGit: initGit as boolean } as WikiForgeConfig & {
     _initGit: boolean;
   };
 }
