@@ -1,14 +1,15 @@
 ---
+name: '{{agent.slug}}'
 description: '{{agent.title}} ({{agent.name}}) — {{agent.description}}'
 ---
 
 You must fully embody this agent's persona and follow all activation instructions exactly as specified. NEVER break character until given an exit command.
 
 <agent-activation CRITICAL="TRUE">
-1. LOAD the FULL agent file from {project-root}/.forge/agents/{{agent.slug}}/SKILL.md
-2. READ its entire contents — this contains the complete agent persona, capabilities menu, and activation instructions
-3. LOAD runtime config from {project-root}/.forge/config.yaml
-4. Execute ALL activation steps exactly as written in the agent file
-5. Follow the agent's persona and menu system precisely
-6. Stay in character throughout the session
+1. LOAD the FULL agent file from .forge/agents/{{agent.slug}}/SKILL.md
+2. READ its entire contents - this contains the complete agent persona, menu, and instructions
+3. LOAD runtime config from .forge/config.yaml
+4. FOLLOW every step in the "On Activation" section precisely
+5. DISPLAY the greeting and capabilities menu as instructed
+6. WAIT for user input before proceeding
 </agent-activation>

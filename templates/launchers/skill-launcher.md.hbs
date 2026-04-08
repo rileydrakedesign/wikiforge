@@ -1,14 +1,16 @@
 ---
+name: '{{skill.slug}}'
 description: '{{skill.name}} — {{skill.description}}'
 ---
 
-<skill-activation>
+<skill-activation CRITICAL="TRUE">
 {{#if (eq skill.phase "core")}}
-1. LOAD the FULL skill file from {project-root}/.forge/core/{{skill.slug}}/SKILL.md
+1. LOAD the FULL skill file from .forge/core/{{skill.slug}}/SKILL.md
 {{else}}
-1. LOAD the FULL skill file from {project-root}/.forge/skills/{{skill.phase}}/{{skill.slug}}/SKILL.md
+1. LOAD the FULL skill file from .forge/skills/{{skill.phase}}/{{skill.slug}}/SKILL.md
 {{/if}}
-2. READ its entire contents and follow the instructions
-3. LOAD runtime config from {project-root}/.forge/config.yaml
-4. Execute the workflow as specified
+2. READ its entire contents - this contains the complete workflow instructions
+3. LOAD runtime config from .forge/config.yaml
+4. If the skill says "Follow ./workflow.md", LOAD that workflow.md file from the same directory
+5. Execute the workflow steps exactly as specified
 </skill-activation>

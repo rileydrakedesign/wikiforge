@@ -13,8 +13,11 @@ const LAUNCHER_DIRS: Record<AgentTool, string> = {
 };
 
 /**
- * Generate IDE launcher stubs in .claude/skills/ (or equivalent).
- * These are thin .md files that load the full agent/skill from .forge/.
+ * Generate IDE launcher stubs matching BMAD's directory format:
+ * .claude/skills/{skill-name}/SKILL.md
+ *
+ * Each launcher is a thin SKILL.md that instructs the LLM to load
+ * the full agent/skill definition from .forge/.
  */
 export async function generateLaunchers(
   rootDir: string,
@@ -30,7 +33,7 @@ export async function generateLaunchers(
       config,
     });
     await writeFileWithDirs(
-      path.join(rootDir, launcherDir, `${meta.slug}.md`),
+      path.join(rootDir, launcherDir, meta.slug, "SKILL.md"),
       content,
     );
   }
@@ -43,38 +46,44 @@ export async function generateLaunchers(
       config,
     });
     await writeFileWithDirs(
-      path.join(rootDir, launcherDir, `${skill.slug}.md`),
+      path.join(rootDir, launcherDir, skill.slug, "SKILL.md"),
       content,
     );
   }
 
-  // Core skill launchers
+  // Core skill launchers — wforge-help
   const helpContent = await renderTemplate("launchers/skill-launcher.md.hbs", {
     skill: {
       slug: "wforge-help",
       name: "WikiForge Help",
-      description: "Navigate the wiki system — see available agents, skills, and recommended next actions",
+      description:
+        "Navigate the wiki system — see available agents, skills, and recommended next actions",
       phase: "core",
     },
     config,
   });
   await writeFileWithDirs(
-    path.join(rootDir, launcherDir, "wforge-help.md"),
+    path.join(rootDir, launcherDir, "wforge-help", "SKILL.md"),
     helpContent,
   );
 
+  // Core skill launchers — wforge-party-mode
   if (config.agents.party_mode) {
-    const partyContent = await renderTemplate("launchers/skill-launcher.md.hbs", {
-      skill: {
-        slug: "wforge-party-mode",
-        name: "Party Mode",
-        description: "Multi-agent roundtable — spawn multiple agents for collaborative analysis",
-        phase: "core",
+    const partyContent = await renderTemplate(
+      "launchers/skill-launcher.md.hbs",
+      {
+        skill: {
+          slug: "wforge-party-mode",
+          name: "Party Mode",
+          description:
+            "Multi-agent roundtable — spawn multiple agents for collaborative analysis",
+          phase: "core",
+        },
+        config,
       },
-      config,
-    });
+    );
     await writeFileWithDirs(
-      path.join(rootDir, launcherDir, "wforge-party-mode.md"),
+      path.join(rootDir, launcherDir, "wforge-party-mode", "SKILL.md"),
       partyContent,
     );
   }
