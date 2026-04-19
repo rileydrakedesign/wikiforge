@@ -130,6 +130,15 @@ This cycle runs **once** and stops. It does not loop. The human reviews the cycl
 - Adversarial review auto-selects disputed claims and auto-applies confidence updates
 - Naming conflicts are auto-resolved; broken link targets get auto-created stub pages
 
+**Maturity guards (bootstrap phase):**
+Autonomous mode is not fully autonomous from day one. When the wiki is sparse, certain operations fall back to human-guided behavior:
+- **Research (Rex)**: Requires 3+ ingested sources before autonomous gap identification. Below that, Rex asks the user what to search for.
+- **Adversarial review (Diana)**: Requires 5+ entity/concept pages before autonomous claim selection. Below that, Diana asks the user which claims to review.
+- **Query compounding (Quinn)**: Only auto-saves synthesis that drew from 3+ wiki pages. Thinner synthesis requires user confirmation.
+- **Full autonomous cycle**: Does not auto-chain from research through lint until the wiki passes the maturity threshold.
+
+As the wiki grows past these thresholds, the system becomes progressively more autonomous. The human provides direction early; the LLM takes over bookkeeping and eventually curation as the foundation solidifies.
+
 **Safety boundaries (unchanged in all modes):**
 - Files in `raw/` are never modified — they are immutable primary sources
 - Content is never deleted — only merged, archived, or redirected

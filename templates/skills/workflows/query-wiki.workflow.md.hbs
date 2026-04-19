@@ -53,7 +53,8 @@ Good answers can be filed back into the wiki as new pages. A comparison you crea
   <critical>This is a key insight: your explorations should compound in the knowledge base, not disappear into chat history.</critical>
   <check if="the answer synthesized multiple pages into a novel comparison, analysis, or connection">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
-    <action>Automatically save the synthesis as a new wiki page — comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`. Create with proper frontmatter, citations, and cross-references to the contributing pages</action>
+    <action>Before auto-saving: verify the synthesis drew from at least 3 wiki pages. If it drew from fewer, the wiki is too thin for reliable autonomous synthesis — offer to save instead of auto-saving, and WAIT for user confirmation</action>
+    <action>If sufficient pages contributed: automatically save the synthesis as a new wiki page — comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`. Create with proper frontmatter, citations, and cross-references to the contributing pages</action>
     <action>Update `wiki/index.md` with the new page</action>
     <action>Log the auto-creation in `wiki/log.md` with `[AUTO] query-compound | created {page} from synthesis of {contributing pages}`</action>
 {{else}}

@@ -9,6 +9,18 @@ Pressure-test claims in the {{config.project.name}} wiki through evidence-based 
 
 <workflow>
 
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+<step n="0" goal="Assess wiki maturity before autonomous review">
+  <action>Count the number of entity and concept pages in `wiki/entities/` and `wiki/concepts/`</action>
+  <action>Scan for pages with `confidence` fields in frontmatter</action>
+  <check if="wiki has fewer than 5 entity/concept pages OR no pages have confidence fields">
+    <critical>The wiki is too sparse for autonomous adversarial review. There are not enough claims to meaningfully pressure-test.</critical>
+    <action>FALL BACK to human-guided mode: ask the user if there is a specific claim or page they want reviewed, or suggest they build more wiki content first via ingestion.</action>
+    <action>WAIT for user input before proceeding.</action>
+  </check>
+</step>
+{{/if}}
+
 <step n="1" goal="Identify target claim(s)">
   <check if="user specified a particular claim or page">
     <action>Focus the review on the specified claim or page</action>
