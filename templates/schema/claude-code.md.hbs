@@ -29,10 +29,23 @@ This is a WikiForge-managed research wiki following the LLM Wiki pattern. This w
 │   ├── sources/                    # Per-source summary pages
 │   └── comparisons/                # Analysis artifacts
 ├── raw/                            # Immutable source documents
-│   ├── articles/
-│   ├── papers/
-│   ├── transcripts/
-│   └── assets/                     # Images, data files
+│   ├── assets/                     # Images, downloaded media
+{{#if (includes config.knowledge.source_types "documents")}}
+│   ├── documents/                  # PDFs — papers, books, reports
+{{/if}}
+{{#if (includes config.knowledge.source_types "articles")}}
+│   ├── articles/                   # Web pages, blog posts
+{{/if}}
+{{#if (includes config.knowledge.source_types "media")}}
+│   ├── media/                      # Original audio/video files
+│   ├── transcripts/                # Whisper transcriptions
+{{/if}}
+{{#if (includes config.knowledge.source_types "code")}}
+│   ├── code/                       # Repository summaries
+{{/if}}
+{{#if (includes config.knowledge.source_types "data")}}
+│   ├── data/                       # CSV, JSON, spreadsheets
+{{/if}}
 ├── outputs/                        # Generated deliverables
 │   ├── exports/
 {{#if (includes config.workflows.outputs "marp")}}
@@ -85,6 +98,47 @@ Run `/wforge-help` at any time to see:
 - Available agents and skills
 - Current wiki state and recommended next actions
 - Research lifecycle phase guidance
+
+## Autonomy Model
+
+This wiki's `ingestion_style` setting governs system-wide workflow autonomy — not just ingestion behavior.
+
+{{#if (eq config.workflows.ingestion_style "deliberate")}}
+**Mode: Deliberate** — The human drives every decision. Each operation stops for approval before creating or modifying wiki pages. The human curates sources and guides emphasis; the LLM does the bookkeeping.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "batch")}}
+**Mode: Batch** — Operations process in batches with brief summaries but without stopping for confirmation at each step. The human reviews the cumulative result after the batch completes.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+**Mode: Autonomous** — The LLM drives the full research cycle with minimal supervision. Agents chain into each other automatically:
+
+**The Autonomous Cycle:**
+1. **Research** (Rex) identifies knowledge gaps and finds high-quality sources
+2. **Fetch** — sources above quality threshold are automatically downloaded into `raw/`
+3. **Ingest** (Iris) processes all new sources into the wiki
+4. **Cross-reference** (Leo) verifies and builds links across new and existing pages
+5. **Reindex** (Leo) rebuilds the wiki index
+6. **Lint** (Linus) health-checks the wiki and produces the cycle report
+7. **Report** — consolidated summary presented to the user
+
+This cycle runs **once** and stops. It does not loop. The human reviews the cycle report and decides what to do next.
+
+**Autonomous behaviors across agents:**
+- Queries that produce novel synthesis are auto-saved as wiki pages
+- Contradictions are auto-flagged with `confidence: disputed`
+- Knowledge gaps are auto-added to `wiki/overview.md` Open Questions
+- Adversarial review auto-selects disputed claims and auto-applies confidence updates
+- Naming conflicts are auto-resolved; broken link targets get auto-created stub pages
+
+**Safety boundaries (unchanged in all modes):**
+- Files in `raw/` are never modified — they are immutable primary sources
+- Content is never deleted — only merged, archived, or redirected
+- Information is never fabricated — only wiki-backed claims are stated as fact
+- Contradictions are flagged, never silently resolved
+- Doubt is never manufactured — claims that survive scrutiny are acknowledged
+
+**Audit log:** Every autonomous decision is logged in `wiki/log.md` with the prefix `[AUTO] action | reasoning`. Review this log to audit what the system did and why.
+{{/if}}
 
 ## Research Lifecycle
 
@@ -195,5 +249,5 @@ Agent and skill behavior is configured via `.forge/config.yaml`. Key settings:
 - `organization`: {{config.knowledge.organization}}
 - `citation_format`: {{config.wiki.citation_format}}
 - `cross_ref_style`: {{config.wiki.cross_ref_style}}
-- `ingestion_style`: {{config.workflows.ingestion_style}}
+- `ingestion_style`: **{{config.workflows.ingestion_style}}** (see Autonomy Model section above)
 - `user_name`: (set this to your name)

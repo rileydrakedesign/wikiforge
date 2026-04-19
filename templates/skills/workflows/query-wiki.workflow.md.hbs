@@ -52,18 +52,34 @@ Good answers can be filed back into the wiki as new pages. A comparison you crea
 <step n="5" goal="Compound the exploration back into the wiki">
   <critical>This is a key insight: your explorations should compound in the knowledge base, not disappear into chat history.</critical>
   <check if="the answer synthesized multiple pages into a novel comparison, analysis, or connection">
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+    <action>Automatically save the synthesis as a new wiki page — comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`. Create with proper frontmatter, citations, and cross-references to the contributing pages</action>
+    <action>Update `wiki/index.md` with the new page</action>
+    <action>Log the auto-creation in `wiki/log.md` with `[AUTO] query-compound | created {page} from synthesis of {contributing pages}`</action>
+{{else}}
     <action>Offer to save it as a new page: comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`</action>
     <action>If the user agrees, create the page with proper frontmatter, citations, and cross-references to the pages that contributed</action>
     <action>Update `wiki/index.md` with the new page</action>
     <action>Log the query and page creation in `wiki/log.md`</action>
+{{/if}}
   </check>
   <check if="the answer revealed knowledge gaps">
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+    <action>Automatically add the gaps to the Open Questions section of `wiki/overview.md`</action>
+    <action>Log the additions with `[AUTO] query-gaps | added {count} open questions from query`</action>
+{{else}}
     <action>Suggest specific sources or topics to ingest that would fill these gaps</action>
     <action>Note gaps as open questions — offer to add them to `wiki/overview.md`</action>
+{{/if}}
   </check>
   <check if="the answer revealed a contradiction not previously flagged">
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+    <action>Automatically flag the contradiction on the relevant wiki pages with `confidence: disputed` and a WARNING callout documenting both positions</action>
+    <action>Log the flagging with `[AUTO] query-contradiction | flagged dispute between {page A} and {page B}`</action>
+{{else}}
     <action>Offer to flag it on the relevant wiki pages with `confidence: disputed`</action>
     <action>Suggest running `wforge-adversarial-review` to evaluate the conflicting claims</action>
+{{/if}}
   </check>
 </step>
 

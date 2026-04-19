@@ -24,7 +24,12 @@ Rebuild the {{config.project.name}} wiki index and verify taxonomy integrity.
 <step n="3" goal="Detect naming issues">
   <action>Check for duplicate pages (same entity/concept with different filenames)</action>
   <action>Check for inconsistent naming conventions (mixed case, inconsistent slugification)</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Automatically resolve naming conflicts using the most descriptive, unambiguous name — update all references to point to the resolved name</action>
+  <action>Log each resolution with `[AUTO] reindex-rename | {old name} → {new name} | {reasoning}`</action>
+{{else}}
   <action>Flag naming conflicts for the user to resolve</action>
+{{/if}}
 </step>
 
 <step n="4" goal="Verify cross-references">

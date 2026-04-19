@@ -8,8 +8,7 @@ project:
 knowledge:
   source_types:
     - articles
-    - videos
-    - podcasts
+    - media
   organization: entity-first
   scale: small
 

@@ -75,11 +75,22 @@ Comprehensive health check of the {{config.project.name}} wiki — find contradi
 </step>
 
 <step n="10" goal="Present report and suggest next actions">
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Produce an **AUTONOMOUS CYCLE REPORT** with the following structure:</action>
+  <action>**Actions Taken**: list every `[AUTO]` log entry from this cycle — pages created, pages updated, sources ingested, confidence levels changed, stubs created, conflicts resolved</action>
+  <action>**Issues Resolved**: contradictions flagged, orphans indexed, broken links fixed, naming conflicts resolved</action>
+  <action>**Issues Requiring Human Attention**: items the system could not resolve autonomously — ambiguous contradictions, low-quality sources that didn't meet auto-ingest threshold, pages that need human review, stubs that need content</action>
+  <action>**Wiki Health Score**: total pages, total issues remaining, percentage of pages without issues</action>
+  <action>**Suggested Next Direction**: what topics to explore next, what questions remain open, whether another autonomous cycle would be productive</action>
+  <action>Append the cycle report summary to `wiki/log.md`</action>
+  <critical>This is the cycle terminus. Do NOT auto-chain into further operations. The human reviews this report and decides what to do next.</critical>
+{{else}}
   <action>Present the categorized report with summary statistics at the top</action>
   <action>Append a lint entry to `wiki/log.md` with the summary statistics</action>
   <action>Suggest priority order for fixing issues</action>
   <action>Specifically recommend: new pages to create, sources to ingest, contradictions to review, and questions worth investigating</action>
   <action>The LLM is good at suggesting new questions to investigate and new sources to look for — do this actively</action>
+{{/if}}
 </step>
 
 </workflow>

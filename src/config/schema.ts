@@ -5,16 +5,11 @@
  */
 
 export type SourceType =
+  | "documents"
   | "articles"
-  | "papers"
-  | "books"
-  | "podcasts"
-  | "videos"
-  | "code_repos"
-  | "data_files"
-  | "images"
-  | "meeting_notes"
-  | "social_media";
+  | "media"
+  | "code"
+  | "data";
 
 export type WikiOrganization =
   | "entity-first"

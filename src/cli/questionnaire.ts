@@ -53,18 +53,33 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
   const sourceTypes = await p.multiselect({
     message: "Source types you'll be working with:",
     options: [
-      { value: "articles" as SourceType, label: "Articles & blog posts" },
-      { value: "papers" as SourceType, label: "Academic papers (PDF)" },
-      { value: "books" as SourceType, label: "Books / book chapters" },
-      { value: "podcasts" as SourceType, label: "Podcasts / audio transcripts" },
-      { value: "videos" as SourceType, label: "Video transcripts (YouTube, lectures)" },
-      { value: "code_repos" as SourceType, label: "Code repositories" },
-      { value: "data_files" as SourceType, label: "Data files (CSV, JSON)" },
-      { value: "images" as SourceType, label: "Images / diagrams" },
-      { value: "meeting_notes" as SourceType, label: "Meeting notes / transcripts" },
-      { value: "social_media" as SourceType, label: "Social media threads" },
+      {
+        value: "documents" as SourceType,
+        label: "Documents",
+        hint: "PDFs — papers, books, reports, whitepapers",
+      },
+      {
+        value: "articles" as SourceType,
+        label: "Articles",
+        hint: "web pages, blog posts, online content",
+      },
+      {
+        value: "media" as SourceType,
+        label: "Media",
+        hint: "podcasts, videos, meeting recordings ��� anything needing transcription",
+      },
+      {
+        value: "code" as SourceType,
+        label: "Code",
+        hint: "repositories, codebases, source code",
+      },
+      {
+        value: "data" as SourceType,
+        label: "Data",
+        hint: "CSV, JSON, spreadsheets, structured datasets",
+      },
     ],
-    initialValues: ["articles" as SourceType, "papers" as SourceType],
+    initialValues: ["articles" as SourceType, "documents" as SourceType],
   });
   handleCancel(sourceTypes);
 
@@ -227,7 +242,7 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
       {
         value: "autonomous" as IngestionStyle,
         label: "Autonomous",
-        hint: "ingest and update with minimal supervision",
+        hint: "full research cycle — discover, ingest, cross-reference, lint, report",
       },
     ],
   });

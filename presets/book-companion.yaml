@@ -7,7 +7,7 @@ project:
 
 knowledge:
   source_types:
-    - books
+    - documents
     - articles
   organization: chronological
   scale: small

@@ -66,8 +66,8 @@ status: "raw"
 
     # Determine output path
     if output_path is None:
-        os.makedirs("raw/papers", exist_ok=True)
-        output_path = os.path.join("raw", "papers", f"{basename}.md")
+        os.makedirs("raw/documents", exist_ok=True)
+        output_path = os.path.join("raw", "documents", f"{basename}.md")
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(full_content)
@@ -83,7 +83,7 @@ def main():
     )
     parser.add_argument("input", help="Path to the input PDF file")
     parser.add_argument(
-        "--output", "-o", help="Output markdown file path (default: raw/papers/<name>.md)"
+        "--output", "-o", help="Output markdown file path (default: raw/documents/<name>.md)"
     )
     args = parser.parse_args()
 

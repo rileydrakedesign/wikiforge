@@ -25,7 +25,11 @@ Create a Marp-formatted slide deck from content in the {{config.project.name}} w
 <step n="3" goal="Create slide outline">
   <action>Draft a slide-by-slide outline: title slide, agenda, content slides, summary, references</action>
   <action>Each content slide: title, 3-5 bullet points, optional speaker notes</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Proceed with the draft outline — log it with `[AUTO] slides-outline | proceeding with {slide count} slides`</action>
+{{else}}
   <action>Present outline to user for approval</action>
+{{/if}}
 </step>
 
 <step n="4" goal="Write Marp-formatted slides">

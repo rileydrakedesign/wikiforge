@@ -19,7 +19,11 @@ Build a structured comparison between entities or concepts in the {{config.proje
 
 <step n="2" goal="Determine comparison dimensions">
   <action>Based on the subjects and domain, identify the most meaningful comparison attributes</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Proceed with the identified dimensions — log the choice with `[AUTO] comparison-dimensions | selected: {dimensions list}`</action>
+{{else}}
   <action>Present the proposed dimensions to the user for confirmation</action>
+{{/if}}
   <action>Read all relevant wiki pages to gather data for each dimension</action>
 </step>
 

@@ -7,9 +7,8 @@ project:
 
 knowledge:
   source_types:
-    - papers
+    - documents
     - articles
-    - books
   organization: thesis-driven
   scale: medium
 

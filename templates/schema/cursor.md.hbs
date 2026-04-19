@@ -49,6 +49,16 @@ agents in `.forge/agents/`, skills in `.forge/skills/`.
 | Ingestion style | {{config.workflows.ingestion_style}} |
 | Page templates | `.forge/templates/` |
 
+{{#if (eq config.workflows.ingestion_style "deliberate")}}
+**Autonomy: Deliberate** — Every operation stops for human approval. The human curates sources and guides emphasis; the LLM does the bookkeeping.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "batch")}}
+**Autonomy: Batch** — Operations process in batches with brief summaries, no stopping for confirmation. Human reviews after batch completes.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+**Autonomy: Autonomous** — Agents chain automatically: Rex finds sources → Iris ingests → Leo cross-refs/reindexes → Linus lints → cycle report. Queries auto-save novel synthesis. Contradictions auto-flagged. All decisions logged with `[AUTO]` prefix in `wiki/log.md`. One cycle, no loops — stops after report for human review. Safety boundaries unchanged (never modify raw/, never fabricate, never delete).
+{{/if}}
+
 {{#if (eq config.wiki.cross_ref_style "wikilink")}}
 Use `[[Page Name]]` for internal wiki links.
 {{else}}

@@ -25,8 +25,12 @@ Compile content from the {{config.project.name}} wiki into a polished deliverabl
 
 <step n="3" goal="Create outline">
   <action>Draft a structured outline appropriate to the output format</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Proceed with the draft outline — log it with `[AUTO] compile-outline | proceeding with {section count} sections`</action>
+{{else}}
   <action>Present the outline to the user for approval before writing</action>
   <action>Adjust based on user feedback</action>
+{{/if}}
 </step>
 
 <step n="4" goal="Compile content">

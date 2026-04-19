@@ -33,15 +33,13 @@ const TOOLS: ToolDef[] = [
   {
     file: "pdf-to-md.py",
     template: "tools/pdf-to-md.py.hbs",
-    condition: (c) => c.knowledge.source_types.includes("papers"),
+    condition: (c) => c.knowledge.source_types.includes("documents"),
     executable: true,
   },
   {
     file: "transcribe.sh",
     template: "tools/transcribe.sh.hbs",
-    condition: (c) =>
-      c.knowledge.source_types.includes("podcasts") ||
-      c.knowledge.source_types.includes("videos"),
+    condition: (c) => c.knowledge.source_types.includes("media"),
     executable: true,
   },
   {

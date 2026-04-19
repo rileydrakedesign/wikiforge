@@ -24,26 +24,44 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
   <check if="source is already a .md file in raw/">
     <goto anchor="frontmatter" />
   </check>
-  <check if="source is a PDF">
-    <action>Run `.forge/tools/pdf-to-md.py` to convert. Preserve tables and structure</action>
+{{#if (includes config.knowledge.source_types "documents")}}
+  <check if="source is a PDF (paper, book, report, whitepaper)">
+    <action>Run `.forge/tools/pdf-to-md.py` to convert. Preserve tables, headings, and structure</action>
+    <action>Save to `raw/documents/{slug}.md`</action>
   </check>
+{{/if}}
+{{#if (includes config.knowledge.source_types "articles")}}
   <check if="source is a URL or web page">
     <action>Fetch the content and convert to clean markdown. Strip navigation, ads, boilerplate</action>
     <action>Download images to `raw/assets/` and rewrite image refs to local paths — URLs break over time, local copies don't</action>
+    <action>Save to `raw/articles/{slug}.md`</action>
   </check>
-  <check if="source is audio (podcast, meeting recording)">
-    <action>Run `.forge/tools/transcribe.sh` to transcribe via Whisper</action>
+{{/if}}
+{{#if (includes config.knowledge.source_types "media")}}
+  <check if="source is audio (podcast, meeting recording, interview)">
+    <action>Run `.forge/tools/transcribe.sh` to transcribe via Whisper. Original file stays in `raw/media/`, transcript goes to `raw/transcripts/{slug}.md`</action>
   </check>
-  <check if="source is video (YouTube, lecture)">
-    <action>Try `yt-dlp` for existing transcripts first. Fall back to Whisper transcription</action>
+  <check if="source is video (YouTube, lecture, webinar)">
+    <action>Try `yt-dlp` for existing transcripts/subtitles first — faster and more accurate than re-transcription</action>
+    <action>Fall back to `.forge/tools/transcribe.sh` for Whisper transcription if no transcript available</action>
+    <action>Original/downloaded file stays in `raw/media/`, transcript goes to `raw/transcripts/{slug}.md`</action>
   </check>
-  <check if="source is a code repository">
-    <action>Generate a summary markdown capturing architecture, key files, and purpose</action>
+{{/if}}
+{{#if (includes config.knowledge.source_types "code")}}
+  <check if="source is a code repository or codebase">
+    <action>Generate a summary markdown capturing: architecture overview, directory structure, key files and their purposes, dependencies, and the project's primary function</action>
+    <action>Save to `raw/code/{slug}.md`</action>
   </check>
-  <check if="source is a data file (CSV, JSON)">
-    <action>Generate descriptive markdown with schema, row counts, and sample data as tables</action>
+{{/if}}
+{{#if (includes config.knowledge.source_types "data")}}
+  <check if="source is a data file (CSV, JSON, spreadsheet)">
+    <action>Generate descriptive markdown with: schema/column definitions, row counts, data types, sample rows as markdown tables, and a narrative summary of what the data represents</action>
+    <action>Save to `raw/data/{slug}.md`</action>
   </check>
-  <action>Save the converted file to `raw/{source_type}/{slug}.md` with a descriptive kebab-case filename</action>
+{{/if}}
+  <check if="source does not match any configured type">
+    <action>Attempt best-effort conversion to markdown and save to `raw/{slug}.md` with a descriptive kebab-case filename</action>
+  </check>
 </step>
 
 <anchor id="frontmatter" />
@@ -84,6 +102,15 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
 {{#if (eq config.workflows.ingestion_style "batch")}}
 <step n="4b" goal="Brief extraction summary (batch mode)">
   <action>Present a brief summary of key findings (3-5 bullets) but proceed without waiting for user confirmation</action>
+</step>
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+<step n="4b" goal="Autonomous extraction processing">
+  <action>Log a brief summary of key findings (3-5 bullets) to the operation record for later review — the user is not in the loop but should be able to audit decisions after the fact</action>
+  <action>Make conservative judgment calls on ambiguities: when unsure whether content warrants a new page vs. updating an existing one, prefer updating existing pages and note the uncertainty</action>
+  <action>When claims conflict with existing wiki content, flag the contradiction with a WARNING callout rather than silently resolving it — conservative means "don't guess, annotate"</action>
+  <action>Decide emphasis based on information density: sections with novel claims or data get more coverage, sections that repeat existing wiki knowledge get less</action>
+  <action>Do NOT stop for user input. Proceed immediately to page creation</action>
 </step>
 {{/if}}
 

@@ -13,12 +13,20 @@ Process multiple sources into the {{config.project.name}} wiki in a single sessi
   <action>Scan `raw/` for files not yet represented in `wiki/sources/`</action>
   <action>If the user provided a list, use that instead</action>
   <action>For each source, identify: filename, source type, estimated complexity</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Log the source list for post-hoc audit but proceed without waiting for confirmation</action>
+{{else}}
   <action>Present the list to the user for confirmation before proceeding</action>
+{{/if}}
 </step>
 
 <step n="2" goal="Confirm processing order">
   <action>Sort sources by type and complexity</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Log the processing order and proceed immediately — autonomous mode does not wait for user confirmation</action>
+{{else}}
   <action>Present the processing order and ask the user to confirm or adjust</action>
+{{/if}}
   <action>Note the total count and estimated scope</action>
 </step>
 
@@ -50,6 +58,14 @@ Process multiple sources into the {{config.project.name}} wiki in a single sessi
   <action>Run `qmd update && qmd embed` to rebuild search index and embeddings</action>
 {{/if}}
 </step>
+
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+<step n="6b" goal="Auto-trigger maintenance (autonomous mode)">
+  <action>Verify cross-references are bidirectional across all pages created or updated in this batch — in autonomous mode there is no human to trigger maintenance manually</action>
+  <action>Run a lightweight lint pass: check frontmatter consistency on new pages, verify all {{config.wiki.cross_ref_style}} links resolve to existing pages, ensure every new page appears in the index</action>
+  <action>If any contradictions were found during the batch, collect them into a prominent summary for the batch report — autonomous mode must surface issues clearly since the user reviews after the fact</action>
+</step>
+{{/if}}
 
 <step n="7" goal="Batch report">
   <action>Summarize the full batch: total sources processed, pages created, pages updated, contradictions found</action>

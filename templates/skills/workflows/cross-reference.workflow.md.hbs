@@ -31,7 +31,15 @@ Build and verify cross-references between pages in the {{config.project.name}} w
 <step n="4" goal="Fix broken references">
   <action>Identify links that point to non-existent pages</action>
   <action>For each broken link: check if the target was renamed (search for similar titles) or if the page should be created</action>
-  <action>Fix renames, flag pages that need creation</action>
+  <action>Fix renames by updating the link to point to the correct page</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>For broken links that point to plausible entities or concepts (not typos or formatting errors), auto-create stub pages with minimal content:</action>
+  <action>Stub pages get frontmatter with `status: stub`, `type` inferred from directory (entity or concept), `title` from the link text, and `last_updated` timestamp</action>
+  <action>Stub body: a single line noting "This page was auto-generated from a cross-reference. Content needed." plus a backlink to the page that referenced it</action>
+  <action>Log each stub creation with `[AUTO] cross-ref-stub | created stub for {page} referenced by {source page}`</action>
+{{else}}
+  <action>Flag pages that need creation</action>
+{{/if}}
 </step>
 
 <step n="5" goal="Report and log">

@@ -22,10 +22,7 @@ export async function createDirectoryStructure(
   config: WikiForgeConfig,
 ): Promise<void> {
   const dirs: string[] = [
-    // Raw source directories
-    "raw/articles",
-    "raw/papers",
-    "raw/transcripts",
+    // Raw source directories (always present)
     "raw/assets",
     // Wiki directories
     "wiki/entities",
@@ -43,21 +40,22 @@ export async function createDirectoryStructure(
     ".forge/core/wforge-help",
   ];
 
-  // Conditional raw subdirectories
-  if (config.knowledge.source_types.includes("books")) {
-    dirs.push("raw/books");
+  // Source-type-driven raw subdirectories
+  if (config.knowledge.source_types.includes("documents")) {
+    dirs.push("raw/documents");
   }
-  if (config.knowledge.source_types.includes("images")) {
-    dirs.push("raw/images");
+  if (config.knowledge.source_types.includes("articles")) {
+    dirs.push("raw/articles");
   }
-  if (config.knowledge.source_types.includes("data_files")) {
+  if (config.knowledge.source_types.includes("media")) {
+    dirs.push("raw/media");
+    dirs.push("raw/transcripts");
+  }
+  if (config.knowledge.source_types.includes("code")) {
+    dirs.push("raw/code");
+  }
+  if (config.knowledge.source_types.includes("data")) {
     dirs.push("raw/data");
-  }
-  if (config.knowledge.source_types.includes("code_repos")) {
-    dirs.push("raw/repos");
-  }
-  if (config.knowledge.source_types.includes("meeting_notes")) {
-    dirs.push("raw/meetings");
   }
 
   // Conditional output subdirectories

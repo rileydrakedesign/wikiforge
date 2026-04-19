@@ -41,9 +41,20 @@ Find new high-quality sources to fill knowledge gaps in the {{config.project.nam
 </step>
 
 <step n="6" goal="Queue for ingestion">
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Auto-select all recommended sources with credibility >= institutional/journalistic AND relevance >= high — log the selection criteria and which sources passed/failed for post-hoc audit with `[AUTO]` prefix</action>
+  <action>For each selected source, fetch the content into `raw/` using the appropriate conversion method (URL fetch and convert to markdown, download PDF, etc.)</action>
+  <action>Log the research session in `wiki/log.md` including: gaps targeted, queries used, sources found, sources selected, sources rejected with reasons</action>
+  <action>Proceed directly to batch ingestion of the fetched sources — invoke the `wforge-batch-ingest` workflow with the new source list</action>
+  <action>After batch ingestion completes, invoke `wforge-cross-reference` to verify link integrity across all new and updated pages</action>
+  <action>Then invoke `wforge-reindex` to rebuild the wiki index</action>
+  <action>Finally, run a lightweight lint pass via `wforge-lint-wiki` to identify any issues introduced during this cycle</action>
+  <critical>This is ONE autonomous cycle: research → fetch → ingest → cross-reference → reindex → lint → report. Do NOT loop back to gap identification. After the lint report, STOP and present a consolidated cycle summary to the user.</critical>
+{{else}}
   <action>Ask the user which recommended sources to ingest</action>
   <action>For approved sources, either queue them for batch ingestion or begin single-source ingestion</action>
   <action>Log the research session in `wiki/log.md`</action>
+{{/if}}
 </step>
 
 </workflow>

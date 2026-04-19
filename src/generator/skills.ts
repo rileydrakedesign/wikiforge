@@ -30,7 +30,8 @@ const SKILLS: SkillDef[] = [
     workflowTemplate: "skills/workflows/batch-ingest.workflow.md.hbs",
     condition: (c) =>
       c.agents.enabled.includes("ingestion") &&
-      c.workflows.ingestion_style === "batch",
+      (c.workflows.ingestion_style === "batch" ||
+        c.workflows.ingestion_style === "autonomous"),
   },
   {
     slug: "wforge-web-research",

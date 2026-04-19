@@ -15,7 +15,11 @@ Pressure-test claims in the {{config.project.name}} wiki through evidence-based 
   </check>
   <check if="no specific target was given">
     <action>Scan the wiki for high-confidence claims that lack strong evidence, or claims marked as disputed</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+    <action>Automatically select ALL claims marked `confidence: disputed` plus any high-confidence claims lacking strong evidence — log the selection with `[AUTO] adversarial-select | reviewing {count} claims`</action>
+{{else}}
     <action>Present 3-5 candidate claims for the user to choose from</action>
+{{/if}}
   </check>
 </step>
 
@@ -44,10 +48,17 @@ Pressure-test claims in the {{config.project.name}} wiki through evidence-based 
 </step>
 
 <step n="6" goal="Update wiki pages">
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Automatically update the confidence level on the reviewed claim's page — do not wait for user approval</action>
+  <action>Add a "Review Notes" section documenting the adversarial analysis</action>
+  <action>If confidence changed, update frontmatter accordingly</action>
+  <action>Log every change with `[AUTO] adversarial-update | {page} confidence changed from {old} to {new} | {reasoning}`</action>
+{{else}}
   <action>With user approval, update the confidence level on the reviewed claim's page</action>
   <action>Add a "Review Notes" section documenting the adversarial analysis</action>
   <action>If confidence changed, update frontmatter accordingly</action>
   <action>Log the review in `wiki/log.md`</action>
+{{/if}}
 </step>
 
 </workflow>

@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: WikiForgeConfig = {
     created: new Date().toISOString().split("T")[0],
   },
   knowledge: {
-    source_types: ["articles"],
+    source_types: ["articles", "documents"],
     organization: "entity-first",
     scale: "small",
   },
