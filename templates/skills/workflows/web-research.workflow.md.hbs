@@ -36,7 +36,7 @@ Find new high-quality sources to fill knowledge gaps in the {{config.project.nam
 <step n="2" goal="Formulate search queries">
   <action>For each identified gap, craft 2-3 targeted search queries</action>
   <action>Include domain-specific terminology relevant to {{config.project.domain}}</action>
-  <action>Prefer queries that target authoritative sources (academic, institutional, expert)</action>
+  <action>Prefer queries that target authoritative sources for this wiki's domain — primary documents, first-hand accounts, and recognized expertise. Avoid summaries-of-summaries unless they cite well.</action>
 </step>
 
 <step n="3" goal="Execute search">
@@ -46,20 +46,20 @@ Find new high-quality sources to fill knowledge gaps in the {{config.project.nam
 </step>
 
 <step n="4" goal="Evaluate and rank candidates">
-  <action>For each candidate, assess: credibility, recency, relevance to wiki domain, depth of coverage</action>
+  <action>For each candidate, assess provenance using the universal taxonomy — primary vs. secondary, first-hand vs. derived, authoritative vs. anecdotal, recent vs. dated — alongside relevance to the wiki's domain and depth of coverage</action>
   <action>Cross-reference against `wiki/sources/` to exclude already-ingested material</action>
   <action>Rank by quality score (credibility × relevance × recency)</action>
 </step>
 
 <step n="5" goal="Present recommendations">
-  <action>Present the top 3-5 sources per gap area with: title, URL, date, credibility assessment, relevance explanation</action>
+  <action>Present the top 3-5 sources per gap area with: title, URL, date, provenance assessment (the taxonomy markers above), and a relevance explanation</action>
   <action>Group recommendations by gap area</action>
   <action>Note which existing wiki pages would benefit from each source</action>
 </step>
 
 <step n="6" goal="Queue for ingestion">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
-  <action>Auto-select all recommended sources with credibility >= institutional/journalistic AND relevance >= high — log the selection criteria and which sources passed/failed for post-hoc audit with `[AUTO]` prefix</action>
+  <action>Auto-select recommended sources that are at minimum: primary OR authoritative, AND relevance >= high. Reject sources that are only secondary/derived OR anecdotal unless they are the only available coverage of a real gap. Log the selection criteria and which sources passed/failed for post-hoc audit with `[AUTO]` prefix.</action>
   <action>For each selected source, fetch the content into `raw/` using the appropriate conversion method (URL fetch and convert to markdown, download PDF, etc.)</action>
   <action>Log the research session in `wiki/log.md` including: gaps targeted, queries used, sources found, sources selected, sources rejected with reasons</action>
   <action>Proceed directly to batch ingestion of the fetched sources — invoke the `wforge-batch-ingest` workflow with the new source list</action>

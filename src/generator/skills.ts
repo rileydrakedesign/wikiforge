@@ -67,6 +67,22 @@ const SKILLS: SkillDef[] = [
     workflowTemplate: "skills/workflows/cross-reference.workflow.md.hbs",
     condition: (c) => c.agents.enabled.includes("librarian"),
   },
+  {
+    slug: "wforge-update-overview",
+    name: "Update Overview",
+    description: "Refresh wiki/overview.md to reflect current themes, open questions, and synthesis",
+    phase: "2-compilation",
+    workflowTemplate: "skills/workflows/update-overview.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("ingestion"),
+  },
+  {
+    slug: "wforge-file-answer",
+    name: "File Answer",
+    description: "Promote a query answer or session synthesis into a permanent wiki page",
+    phase: "2-compilation",
+    workflowTemplate: "skills/workflows/file-answer.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("query"),
+  },
 
   // 3-analysis
   {
@@ -123,6 +139,14 @@ const SKILLS: SkillDef[] = [
       c.agents.enabled.includes("synthesis") &&
       c.workflows.outputs.includes("pdf"),
   },
+  {
+    slug: "wforge-periodic-digest",
+    name: "Periodic Digest",
+    description: "Produce a wiki-backed digest of what changed over a window (typically weekly)",
+    phase: "4-synthesis",
+    workflowTemplate: "skills/workflows/periodic-digest.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("synthesis"),
+  },
 
   // maintenance
   {
@@ -148,6 +172,38 @@ const SKILLS: SkillDef[] = [
     phase: "maintenance",
     workflowTemplate: "skills/workflows/stats.workflow.md.hbs",
     condition: (c) => c.workflows.tools.includes("stats"),
+  },
+  {
+    slug: "wforge-resolve-contradiction",
+    name: "Resolve Contradiction",
+    description: "Reconcile a flagged contradiction via annotation, supersession, split, or reconciliation",
+    phase: "maintenance",
+    workflowTemplate: "skills/workflows/resolve-contradiction.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("lint"),
+  },
+  {
+    slug: "wforge-supersede-claim",
+    name: "Supersede Claim",
+    description: "Explicitly archive an older page in favor of a newer one and redirect cross-references",
+    phase: "maintenance",
+    workflowTemplate: "skills/workflows/supersede-claim.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("librarian"),
+  },
+  {
+    slug: "wforge-deduplicate",
+    name: "Deduplicate",
+    description: "Find and merge duplicate sources and pages using content_hash and title similarity",
+    phase: "maintenance",
+    workflowTemplate: "skills/workflows/deduplicate.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("librarian"),
+  },
+  {
+    slug: "wforge-decay-and-verify",
+    name: "Decay and Verify",
+    description: "Re-verify aging claims against current sources and update confidence",
+    phase: "maintenance",
+    workflowTemplate: "skills/workflows/decay-and-verify.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("lint"),
   },
 ];
 

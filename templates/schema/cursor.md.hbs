@@ -9,7 +9,7 @@
 - **Knowledge scale**: {{config.knowledge.scale}}
 - **Organization**: {{config.knowledge.organization}}
 
-WikiForge-managed research wiki. Knowledge in `wiki/`, sources in `raw/`,
+WikiForge-managed LLM Wiki. Knowledge in `wiki/`, sources in `raw/`,
 agents in `.forge/agents/`, skills in `.forge/skills/`.
 
 ## Structure
@@ -18,7 +18,7 @@ agents in `.forge/agents/`, skills in `.forge/skills/`.
 - `raw/` — Immutable source documents
 - `outputs/` — Generated deliverables
 - `.forge/agents/` — Agent personas with SKILL.md and capabilities menus
-- `.forge/skills/{phase}/` — Workflows organized by research lifecycle phase
+- `.forge/skills/{phase}/` — Workflows organized by wiki lifecycle phase
 - `.forge/config.yaml` — Runtime configuration
 - `.forge/_config/` — Manifests (skill, agent, file catalogs)
 - `.cursor/skills/` — IDE launchers
@@ -31,13 +31,19 @@ agents in `.forge/agents/`, skills in `.forge/skills/`.
 {{/with}}
 {{/each}}
 
-## Research Lifecycle
+## Wiki Lifecycle
 
 1. **Acquisition**: ingest-source, batch-ingest, web-research
-2. **Compilation**: update-entities, update-concepts, cross-reference
+2. **Compilation**: update-entities, update-concepts, cross-reference, update-overview, file-answer
 3. **Analysis**: query-wiki, generate-comparison, adversarial-review
-4. **Synthesis**: compile-output, generate-slides, export-report
-5. **Maintenance**: lint-wiki, reindex, stats
+4. **Synthesis**: compile-output, generate-slides, export-report, periodic-digest
+5. **Maintenance**: lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify
+
+## Core Loops
+
+- **Index-first**: read `wiki/index.md` before searching pages — it is the primary navigation tool.
+- **Answers compound**: novel synthesis from query-wiki is filed back into the wiki via `file-answer` (comparisons → `wiki/comparisons/`, analyses → `wiki/concepts/`).
+- **Parseable log**: every operation appends to `wiki/log.md` with `## [ISO-timestamp] operation | title`.
 
 ## Conventions
 
@@ -73,3 +79,4 @@ Use `[Page Name](./page-name.md)` for internal wiki links.
 4. Use page templates from `.forge/templates/` when creating new pages
 5. Flag contradictions explicitly rather than silently resolving them
 6. Load `.forge/config.yaml` for runtime settings before operating
+7. Maintain lifecycle frontmatter (`status`, `supersedes`, `superseded_by`, `last_verified`) when claims change or are re-checked

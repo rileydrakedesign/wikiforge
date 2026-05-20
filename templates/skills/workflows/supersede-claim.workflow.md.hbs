@@ -1,0 +1,95 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Supersede Claim
+
+## Goal
+Apply explicit, audit-trailed supersession to a wiki page in the {{config.project.name}} wiki — the older page is archived (not deleted), the newer page records what it replaces, and every cross-reference in the wiki is updated.
+
+## Core Principle
+Supersession is how the wiki handles knowledge changing over time without losing its history. Content is never deleted — only marked, redirected, and preserved.
+
+Use this skill when:
+- A new source updates a claim that an existing page made differently
+- Two pages cover the same subject but the newer one is strictly more accurate and authoritative
+- `resolve-contradiction` diagnosed a contradiction as a clean supersession
+
+Do NOT use this skill to:
+- Resolve a real disagreement (use `resolve-contradiction` with the Annotated outcome instead)
+- Delete a page (the wiki never deletes; it supersedes or archives)
+- Hide an old version from the audit trail
+
+<workflow>
+
+<step n="1" goal="Identify the pages">
+  <action>You need: an older page (to be superseded) and a newer page (the replacement). If only the older is known, the newer should usually already exist — if it doesn't, do not supersede; instead, update the existing page in place</action>
+  <action>Confirm the two pages cover the same subject and scope. If not, this is the wrong skill — use `resolve-contradiction` (Split outcome) instead</action>
+  <action>Confirm the newer page is genuinely more authoritative AND newer. Newer alone is not enough.</action>
+</step>
+
+<step n="2" goal="Update the older page's frontmatter">
+  <action>Set on the older page:</action>
+  <action>- `status: superseded`</action>
+  <action>- `superseded_by: "{slug-of-newer-page}"`</action>
+  <action>- `last_verified: {today-ISO-date}` (the verification that produced this supersession)</action>
+  <action>Preserve all original content — do NOT rewrite the body. The page is now historical record, not current claim.</action>
+</step>
+
+<step n="3" goal="Annotate the older page's body">
+  <action>At the top of the body (immediately after the H1), insert a clearly visible callout:</action>
+  <action>```</action>
+  <action>> **Superseded.** This page has been superseded by [[{newer-page-title}]] as of {ISO-date}. Reason: {one sentence}. The content below is preserved as historical record.</action>
+  <action>```</action>
+  <action>Use {{config.wiki.cross_ref_style}} link style</action>
+  <action>Do not edit anything else in the body</action>
+</step>
+
+<step n="4" goal="Update the newer page's frontmatter">
+  <action>On the newer page, ensure:</action>
+  <action>- `status: current`</action>
+  <action>- `supersedes:` includes the slug of the older page (append if other supersessions already listed)</action>
+  <action>- `last_verified: {today-ISO-date}`</action>
+</step>
+
+<step n="5" goal="Annotate the newer page's body">
+  <action>In an appropriate section (often "Sources" or a new "History" subsection at the bottom), add a brief note:</action>
+  <action>```</action>
+  <action>This page supersedes [[{older-page-title}]] as of {ISO-date}. Reason: {one sentence}.</action>
+  <action>```</action>
+  <action>This is the back-link that closes the audit loop</action>
+</step>
+
+<step n="6" goal="Redirect cross-references">
+  <action>Scan every wiki page for {{config.wiki.cross_ref_style}} links pointing at the older page's slug</action>
+  <action>For each link, decide:</action>
+  <action>- **Forward**: if the link is about the current state of the subject, rewrite it to point at the newer page</action>
+  <action>- **Preserve**: if the link is making a historical reference (e.g., "as previously claimed in [[older]]"), leave it pointing at the older page</action>
+  <action>Default to **Forward** when in doubt — most links want the current page</action>
+  <action>Track which links were rewritten vs. preserved for the log</action>
+</step>
+
+<step n="7" goal="Update the index">
+  <action>In `wiki/index.md`, ensure the older page's entry reflects its `superseded` status (e.g., italicize, mark with "(superseded)", or move under a "Historical / superseded" subsection if the index has one)</action>
+  <action>Ensure the newer page is indexed under the correct category with a current one-line description</action>
+</step>
+
+<step n="8" goal="Update overview if material">
+  <action>If the superseded claim was a Key Theme or referenced in the Open Questions of `wiki/overview.md`, invoke `wforge-update-overview` afterward — supersession of a major claim is exactly the kind of shift the overview should reflect</action>
+</step>
+
+<step n="9" goal="Log the supersession">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] supersede-claim | {older-slug} → {newer-slug}`</action>
+  <action>Include: reason, sources cited on the newer page, count of cross-references rewritten, count preserved</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Autonomous mode: supersession changes wiki topology. Only auto-apply when the newer page already exists AND was created by ingestion of a source that explicitly post-dates and contradicts the older page's source. Otherwise queue for human review. Prefix with `[AUTO]` only when auto-applied.</action>
+{{/if}}
+</step>
+
+<step n="10" goal="Report">
+  <action>Tell the user: which page was superseded, by what, when, and why. List the cross-references that were rewritten.</action>
+  <action>Confirm the older page is still on disk (it should be — supersession is not deletion)</action>
+</step>
+
+</workflow>

@@ -29,8 +29,8 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
   handleCancel(projectName);
 
   const domain = await p.text({
-    message: "Research domain/topic:",
-    placeholder: 'e.g., "Agentic AI Systems", "Renaissance Art"',
+    message: "Domain / topic:",
+    placeholder: 'e.g., "Agentic AI", "Renaissance art", "Our team playbook", "Q4 launches"',
   });
   handleCancel(domain);
 
@@ -56,7 +56,7 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
       {
         value: "documents" as SourceType,
         label: "Documents",
-        hint: "PDFs — papers, books, reports, whitepapers",
+        hint: "PDFs — papers, books, specs, manuals, reports, transcripts",
       },
       {
         value: "articles" as SourceType,
@@ -126,12 +126,12 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
       {
         value: "medium" as ProjectScale,
         label: "Medium",
-        hint: "50-200 sources, serious research",
+        hint: "50-200 sources, sustained effort",
       },
       {
         value: "large" as ProjectScale,
         label: "Large",
-        hint: "200+ sources, long-running project",
+        hint: "200+ sources, long-running wiki",
       },
     ],
   });
@@ -169,7 +169,7 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
   handleCancel(agentTool);
 
   const agents = await p.multiselect({
-    message: "Research agents to include:",
+    message: "Agents to include:",
     options: [
       {
         value: "ingestion" as AgentType,
@@ -242,7 +242,7 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
       {
         value: "autonomous" as IngestionStyle,
         label: "Autonomous",
-        hint: "full research cycle — discover, ingest, cross-reference, lint, report",
+        hint: "full ingest cycle — discover, ingest, cross-reference, lint, report",
       },
     ],
   });
@@ -287,6 +287,21 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
         value: "stats" as ToolOption,
         label: "Stats script",
         hint: "wiki health dashboard",
+      },
+      {
+        value: "graph" as ToolOption,
+        label: "Graph visualization",
+        hint: "interactive wiki graph (graph.html)",
+      },
+      {
+        value: "watch" as ToolOption,
+        label: "Raw watcher",
+        hint: "auto-ingest when files land in raw/",
+      },
+      {
+        value: "diff" as ToolOption,
+        label: "Wiki diff",
+        hint: "summarize wiki changes since last ingest",
       },
     ],
     initialValues: ["search" as ToolOption],

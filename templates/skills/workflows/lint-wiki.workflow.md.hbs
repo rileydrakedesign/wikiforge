@@ -5,9 +5,34 @@ config: '{project-root}/.forge/config.yaml'
 # Lint Wiki
 
 ## Goal
-Comprehensive health check of the {{config.project.name}} wiki — find contradictions, orphans, stale content, structural issues, and growth opportunities. A wiki is only as good as its maintenance. The LLM handles the maintenance burden that causes humans to abandon wikis.
+Comprehensive health check of the {{config.project.name}} wiki — find contradictions, orphans, stale content, structural issues, and growth opportunities, then auto-fix the mechanical issues. A wiki is only as good as its maintenance. The LLM handles the maintenance burden that causes humans to abandon wikis.
+
+## Posture
+
+By default, this skill **fixes** what it can safely fix and **reports** what it cannot. The fix bar is conservative — anything that changes meaning, confidence, or topology is left for a specialized skill, not auto-applied here.
+
+| Category | Default behavior | Why |
+|---|---|---|
+| Frontmatter missing required fields | **Fix**: insert sensible defaults (`status: current`, `supersedes: []`, `superseded_by: null`, `last_verified` = page's `last_updated`) | Pure formatting — no claim changes |
+| Frontmatter malformed dates | **Fix**: normalize to ISO format if intent is unambiguous | Pure formatting |
+| Broken cross-references to renamed / superseded pages | **Fix**: rewrite to the new target | Topology already changed elsewhere; this is bookkeeping |
+| Pages on disk missing from `wiki/index.md` | **Fix**: add the entry with a one-line description derived from the page | Bookkeeping |
+| Wikilinks pointing at non-existent pages with plausible names | **Fix**: create a stub page with `status: stub` so the link resolves; flag for content | The link itself is an explicit signal a page was expected |
+| Missing `last_verified` initialization | **Fix**: stamp with the page's `last_updated` | Bookkeeping |
+| Contradictions between pages | **Report only** (suggest `wforge-resolve-contradiction`) | Changes meaning |
+| Pages superseded by newer ones but not marked | **Report only** (suggest `wforge-supersede-claim`) | Changes topology |
+| Stale claims (last_verified expired) | **Report only** (suggest `wforge-decay-and-verify`) | Changes confidence |
+| Duplicate sources or pages | **Report only** (suggest `wforge-deduplicate`) | Changes topology |
+| Mentioned-but-uncreated entity/concept candidates with no explicit wikilink | **Report only** (suggest as new pages) | Requires editorial judgement |
+
+If invoked with `--report-only`, **all** fixes are skipped — every finding becomes a report item. Use this when you want a full audit before deciding what to apply.
 
 <workflow>
+
+<step n="0" goal="Parse invocation flags">
+  <action>If invoked with `--report-only`, set REPORT_ONLY = true. Otherwise REPORT_ONLY = false (the default — auto-fix is on).</action>
+  <action>Initialize two counters: `fixed_count = 0`, `unresolved_count = 0`. Track per-category as you go.</action>
+</step>
 
 <step n="1" goal="Scan all wiki pages">
   <action>Read `wiki/index.md` to get the catalog of all known pages</action>
@@ -17,10 +42,15 @@ Comprehensive health check of the {{config.project.name}} wiki — find contradi
 
 <step n="2" goal="Check frontmatter consistency">
 {{#if config.wiki.frontmatter}}
-  <action>For each wiki page, verify required frontmatter fields exist: type, title, last_updated</action>
-  <action>Check that frontmatter values are valid (dates are parseable, types are recognized)</action>
-  <action>Flag pages with missing or malformed frontmatter</action>
-  <action>Check content_hash fields in source summaries — if a raw source has changed since ingestion, the hash will mismatch, signaling the wiki page may be stale</action>
+  <action>For each wiki page, verify required frontmatter fields exist: type, title, last_updated, and the lifecycle fields (status, supersedes, superseded_by, last_verified)</action>
+  <action>Check that frontmatter values are valid (dates are parseable, types are recognized, status is one of `current`/`superseded`/`archived`/`stub`)</action>
+  <check if="REPORT_ONLY is false AND a page has missing or malformed frontmatter">
+    <action>**Auto-fix**: insert sensible defaults. `status: current` if absent. `supersedes: []` if absent. `superseded_by: null` if absent. `last_verified` = page's `last_updated` if absent. Normalize parseable but non-ISO dates to ISO. Increment fixed_count.</action>
+  </check>
+  <check if="REPORT_ONLY is true OR the frontmatter issue is not auto-fixable (e.g., unknown `type` value)">
+    <action>Flag the page in the report with the specific malformation. Increment unresolved_count.</action>
+  </check>
+  <action>Check content_hash fields in source summaries — if a raw source has changed since ingestion, the hash will mismatch, signaling the wiki page may be stale. Report (do not auto-fix; this requires re-ingestion).</action>
 {{else}}
   <action>Frontmatter is disabled — skip this check</action>
 {{/if}}
@@ -35,8 +65,18 @@ Comprehensive health check of the {{config.project.name}} wiki — find contradi
 <step n="4" goal="Check cross-references">
   <action>Scan all {{config.wiki.cross_ref_style}} links in every wiki page</action>
   <action>Verify each link target exists</action>
-  <action>Flag broken links (point to non-existent pages)</action>
-  <action>Check for one-directional links that should be bidirectional — if page A links to page B, page B should link back</action>
+  <action>For each broken link, classify:</action>
+  <action>- **Renamed/superseded target**: the target page has a `superseded_by` set, or the slug matches a known rename in `wiki/log.md`</action>
+  <action>- **Missing target with plausible name**: the link looks like a real concept or entity (proper capitalization, used elsewhere in body), the target just doesn't exist yet</action>
+  <action>- **Typo / dead reference**: doesn't match any known page and isn't a plausible new one</action>
+  <check if="REPORT_ONLY is false AND the broken link points at a renamed/superseded target">
+    <action>**Auto-fix**: rewrite the link to point at the new/canonical target. Increment fixed_count.</action>
+  </check>
+  <check if="REPORT_ONLY is false AND the broken link is a missing-but-plausible target">
+    <action>**Auto-fix**: create a stub page at the target location with `status: stub` and a brief placeholder body ("Stub. Referenced from [list of pages]. Content pending."). Add it to `wiki/index.md`. Increment fixed_count.</action>
+  </check>
+  <action>Otherwise (typo / dead): report and increment unresolved_count</action>
+  <action>Check for one-directional links that should be bidirectional. **Auto-fix** if REPORT_ONLY is false: add the missing back-link in an appropriate section (Related Concepts, Related Entities, etc.). Increment fixed_count.</action>
 </step>
 
 <step n="5" goal="Detect mentioned-but-uncreated pages">
@@ -47,11 +87,13 @@ Comprehensive health check of the {{config.project.name}} wiki — find contradi
   <action>Report these as "suggested new pages" — the wiki should grow to cover everything it references</action>
 </step>
 
-<step n="6" goal="Identify contradictions and stale content">
+<step n="6" goal="Identify contradictions and stale content (report only — never auto-fix)">
   <action>Scan pages for claims about the same entity or concept that conflict</action>
   <action>Check for pages with `confidence: disputed` that have not been resolved</action>
   <action>Look for stale claims — information from old sources that newer sources may have superseded</action>
-  <action>Check last_updated dates — pages not updated in a long time may contain outdated information</action>
+  <action>Check `last_verified` dates against the wiki's decay threshold — pages whose claims have aged out are candidates for `wforge-decay-and-verify`</action>
+  <action>Look for duplicate sources (same `content_hash`) and duplicate pages (matching titles/aliases) — candidates for `wforge-deduplicate`</action>
+  <action>For each finding, increment unresolved_count and record the suggested follow-up skill: `wforge-resolve-contradiction`, `wforge-supersede-claim`, `wforge-decay-and-verify`, or `wforge-deduplicate`</action>
 </step>
 
 <step n="7" goal="Check source coverage">
@@ -64,14 +106,21 @@ Comprehensive health check of the {{config.project.name}} wiki — find contradi
   <action>Ensure every wiki page appears in `wiki/index.md` under the correct category</action>
   <action>Check that index entries match actual page titles</action>
   <action>Verify the index follows {{config.knowledge.organization}} organization style</action>
-  <action>Check `wiki/overview.md` — are the Key Themes still accurate? Are the Open Questions still open? Are the Statistics current?</action>
+  <check if="REPORT_ONLY is false AND pages exist on disk but are missing from the index">
+    <action>**Auto-fix**: add each missing page to the appropriate category in `wiki/index.md` with a one-line description pulled from the page's first paragraph. Increment fixed_count.</action>
+  </check>
+  <action>Check `wiki/overview.md` — are the Key Themes still accurate? Are the Open Questions still open? Are the Statistics current? If overview is more than 30 days stale or statistics are clearly out of date, suggest `wforge-update-overview` (report, do not auto-invoke — this is a synthesis operation, not bookkeeping).</action>
 </step>
 
 <step n="9" goal="Compile health report">
-  <action>Group all issues by category: Contradictions, Orphan Pages, Broken Links, Mentioned-But-Uncreated Pages, Stale Claims, Frontmatter Issues, Index Gaps, Source Gaps, Overview Staleness</action>
-  <action>Sort by severity: errors (contradictions, broken links) before warnings (stale claims, missing tags) before suggestions (new pages to create)</action>
-  <action>For each issue, include a suggested fix or next action</action>
-  <action>Calculate summary statistics: total pages, total issues, health score (percentage of pages without issues), un-ingested sources count</action>
+  <action>Produce two sections:</action>
+  <action>**Fixed** (when REPORT_ONLY is false): grouped by category — frontmatter normalizations, link rewrites, stubs created, missing index entries added, back-links added. Show counts per category and `fixed_count` total.</action>
+  <action>**Unresolved**: grouped by category — Contradictions, Pending Supersessions, Stale Claims, Duplicates, Mentioned-But-Uncreated Pages, Overview Staleness, anything else. For each, include the specific page(s) and the suggested follow-up skill (`wforge-resolve-contradiction`, `wforge-supersede-claim`, `wforge-decay-and-verify`, `wforge-deduplicate`, `wforge-update-overview`).</action>
+  <action>Sort the Unresolved section by severity: errors (contradictions, true dead links) before warnings (stale claims) before suggestions (new pages to create)</action>
+  <action>Calculate summary statistics: total pages, fixed_count, unresolved_count, health score (percentage of pages with no unresolved issues), un-ingested sources count</action>
+  <check if="REPORT_ONLY is true">
+    <action>Note prominently at the top of the report: "Report-only mode — no fixes applied. Re-run without `--report-only` to apply the auto-fixable items."</action>
+  </check>
 </step>
 
 <step n="10" goal="Present report and suggest next actions">
@@ -85,10 +134,12 @@ Comprehensive health check of the {{config.project.name}} wiki — find contradi
   <action>Append the cycle report summary to `wiki/log.md`</action>
   <critical>This is the cycle terminus. Do NOT auto-chain into further operations. The human reviews this report and decides what to do next.</critical>
 {{else}}
-  <action>Present the categorized report with summary statistics at the top</action>
-  <action>Append a lint entry to `wiki/log.md` with the summary statistics</action>
-  <action>Suggest priority order for fixing issues</action>
-  <action>Specifically recommend: new pages to create, sources to ingest, contradictions to review, and questions worth investigating</action>
+  <action>Present the Fixed and Unresolved sections with summary statistics at the top (or just Unresolved if REPORT_ONLY)</action>
+  <action>Append a lint entry to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] lint-wiki | fixed: {N}, unresolved: {M}{{#if config.workflows.ingestion_style}}{{/if}}`</action>
+  <action>If REPORT_ONLY was set, suffix with ` | report-only`</action>
+  <action>For each fix applied, append a one-line sub-bullet under the lint entry naming the category and the page (the audit trail; the wiki should know what was touched)</action>
+  <action>Suggest priority order for the unresolved items — typically contradictions first, then supersessions, then stale claims, then new pages</action>
   <action>The LLM is good at suggesting new questions to investigate and new sources to look for — do this actively</action>
 {{/if}}
 </step>

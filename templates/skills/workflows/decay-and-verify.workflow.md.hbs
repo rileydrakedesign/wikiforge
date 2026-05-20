@@ -1,0 +1,69 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Decay and Verify
+
+## Goal
+Walk the {{config.project.name}} wiki for pages whose claims have aged past their `last_verified` date, re-check them against current sources, and update confidence accordingly.
+
+## Core Principle
+The wiki is a compounding artifact, not a guaranteed-current one. Without active verification, old high-confidence claims silently drift — the source they depended on may have been retracted, contradicted, or made obsolete. Decay-and-verify is the wiki's antidote: a periodic re-pass that asks, for each aging claim, "is this still true?"
+
+This skill does not decide claims have changed. It surfaces what has aged, re-reads the source backing for those pages, and either bumps `last_verified` (claim still holds) or flags the page for follow-up (claim has weakened). The goal is honest currency, not artificial freshness.
+
+`last_verified` is set on every page when it is created or updated. This skill is the only thing that legitimately re-stamps `last_verified` without modifying body content.
+
+<workflow>
+
+<step n="1" goal="Pick the decay threshold">
+  <action>Read the requested threshold from the user, or default by scale:</action>
+  <action>- small wikis (< 50 sources): 180 days</action>
+  <action>- medium wikis (50-200): 90 days</action>
+  <action>- large wikis (200+): 60 days</action>
+  <action>Pages whose `last_verified` is older than the threshold are candidates. Pages with `status: superseded` or `status: archived` are excluded — they are historical record by definition.</action>
+</step>
+
+<step n="2" goal="Build the candidate list">
+  <action>Walk `wiki/entities/`, `wiki/concepts/`, `wiki/comparisons/`, `wiki/sources/`. Read each page's frontmatter.</action>
+  <action>Collect pages whose `last_verified` is older than (today - threshold) AND `status` is `current`</action>
+  <action>Prioritize high-confidence and high-`source_count` pages — these have the most leverage in the wiki and benefit most from re-verification</action>
+  <action>If the candidate list is very long, take the top N (by leverage) for this pass — decay is periodic; this does not need to be exhaustive each run</action>
+</step>
+
+<step n="3" goal="Re-verify each candidate page">
+  <action>For each candidate, perform the following sub-steps:</action>
+  <action>**3a. Re-read the page in full.** Note its main claims.</action>
+  <action>**3b. Re-read the source(s) it cites.** Read the source summaries in `wiki/sources/` linked from the page. If a `content_hash` is set, check whether the underlying raw file still hashes to the same value — if not, the source has changed since ingestion (rare, but possible) and the claim must be re-derived from the new content.</action>
+  <action>**3c. Check for newer sources that contradict.** Look in `wiki/sources/` for any source ingested after the page's `last_verified` that touches the same entities/concepts. If found, read whether it strengthens, weakens, or contradicts the page's claims.</action>
+  <action>**3d. Make a judgment.** Pick one outcome:</action>
+  <action>- **Re-affirmed**: claims still hold, no newer source weakens them. Update `last_verified` to today. No body changes. Confidence unchanged.</action>
+  <action>- **Strengthened**: newer sources reinforce the claims. Update `last_verified`, optionally bump confidence (e.g., medium → high), append citations to the new sources.</action>
+  <action>- **Weakened**: newer evidence has appeared that partially contradicts the claims. Lower `confidence` (e.g., high → medium, or to `disputed`). Add a WARNING callout describing the tension. Do not silently rewrite the body — the disagreement is the finding.</action>
+  <action>- **Stale**: the page is no longer accurate but no specific newer source contradicts it (e.g., the underlying world changed). Lower `confidence` to `low` and add a note. Suggest the user re-research via `wforge-web-research` if Rex is enabled.</action>
+  <action>- **Superseded**: a newer page exists that genuinely replaces this one. Invoke `wforge-supersede-claim` and move on — do not handle supersession mechanics here.</action>
+</step>
+
+<step n="4" goal="Apply the updates">
+  <action>For each re-affirmed page: set `last_verified` to today. That is the only change.</action>
+  <action>For each strengthened page: update `last_verified`, optionally `confidence`, append new citations. Preserve existing content; do not rewrite.</action>
+  <action>For each weakened or stale page: update `confidence` and `last_verified`, add the WARNING callout. Do not delete or rewrite original claims — the WARNING is the modification.</action>
+  <action>For superseded pages: handled in step 3d via `wforge-supersede-claim`. Nothing additional here.</action>
+</step>
+
+<step n="5" goal="Log the pass">
+  <action>Append a single summary entry to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] decay-and-verify | reviewed {N} pages`</action>
+  <action>Include counts by outcome (re-affirmed / strengthened / weakened / stale / superseded), threshold used, total candidates</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Autonomous mode: only auto-apply Re-affirmed and Strengthened outcomes. Weakened, Stale, and Superseded change confidence or topology and should surface in the cycle report for human attention. Prefix the log with `[AUTO]` only for the auto-applied bumps; list the rest as awaiting review.</action>
+{{/if}}
+</step>
+
+<step n="6" goal="Report">
+  <action>Present the per-outcome counts</action>
+  <action>List the pages that ended up weakened or stale, with brief reasoning — these are where the user's attention is most valuable</action>
+  <action>If many pages weakened or went stale at once, the wiki may be entering an era where its underlying domain shifted; suggest a `wforge-web-research` pass if Rex is enabled, and a `wforge-update-overview` to reflect the new state</action>
+</step>
+
+</workflow>

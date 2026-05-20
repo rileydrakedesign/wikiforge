@@ -11,7 +11,12 @@ tags:
 first_mentioned: "{{first_mentioned}}"
 source_count: {{source_count}}
 last_updated: "{{last_updated}}"
+last_verified: "{{#if last_verified}}{{last_verified}}{{else}}{{last_updated}}{{/if}}"
 confidence: {{confidence}}
+status: {{#if status}}{{status}}{{else}}current{{/if}}
+supersedes: {{#if supersedes}}{{#each supersedes}}
+  - "{{this}}"{{/each}}{{else}}[]{{/if}}
+superseded_by: {{#if superseded_by}}"{{superseded_by}}"{{else}}null{{/if}}
 ---
 
 # {{title}}

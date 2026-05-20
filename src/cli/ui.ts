@@ -19,7 +19,7 @@ export function showBanner(): void {
   │  ██║███╗██║██║██╔═██╗ ██║██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝    │
   │  ╚███╔███╔╝██║██║  ╚██╗██║██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗  │
   │   ╚══╝╚══╝ ╚═╝╚═╝   ╚═╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝  │
-  │           Scaffold LLM-Powered Research Agents                │
+  │              Scaffold an LLM Wiki, ready to run               │
   ╰───────────────────────────────────────────────────────────────╯`),
   );
 }
@@ -54,17 +54,17 @@ export function showComplete(projectName: string, agentTool: string): void {
         : "claude";
 
   p.note(
-    `${chalk.green("Your research agent repository is ready!")}
+    `${chalk.green("Your LLM Wiki is ready!")}
 
   ${chalk.cyan("cd")} ${projectName}
   ${chalk.cyan(toolCmd)}  ${chalk.dim("# or cursor, codex, etc.")}
 
   Start with:
-  ${chalk.yellow('"Ingest this article: <paste URL or file path>"')}`,
+  ${chalk.yellow('"Ingest this source: <paste URL or file path>"')}`,
     "Next Steps",
   );
 
-  p.outro(chalk.green("Happy researching!"));
+  p.outro(chalk.green("Happy compounding!"));
 }
 
 /**

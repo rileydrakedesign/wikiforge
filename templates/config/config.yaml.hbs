@@ -17,3 +17,12 @@ scale: "{{config.knowledge.scale}}"
 frontmatter_enabled: {{config.wiki.frontmatter}}
 log_file: "wiki/log.md"
 index_file: "wiki/index.md"
+overview_file: "wiki/overview.md"
+
+# Lifecycle thresholds — used by decay-and-verify and lint to decide when
+# claims are aging. These default by scale and can be overridden here.
+decay_threshold_days: {{#if (eq config.knowledge.scale "small")}}180{{else if (eq config.knowledge.scale "medium")}}90{{else}}60{{/if}}
+
+# Lint posture — auto-fix safe categories by default; users override with
+# `--report-only` when invoking the skill, or by setting this to false.
+lint_autofix: true

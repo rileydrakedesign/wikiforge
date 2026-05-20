@@ -13,7 +13,7 @@ const LAUNCHER_DIRS: Record<AgentTool, string> = {
 };
 
 /**
- * Create the full directory structure for a research wiki project.
+ * Create the full directory structure for an LLM Wiki project.
  * BMAD-aligned: agents as directories, skills organized by phase,
  * manifest config, IDE launchers.
  */

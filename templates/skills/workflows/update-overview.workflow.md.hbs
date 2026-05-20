@@ -1,0 +1,80 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Update Overview
+
+## Goal
+Refresh `wiki/overview.md` so it accurately reflects the current state of the {{config.project.name}} wiki — Key Themes, Open Questions, Evolving Synthesis, and Statistics. The overview is a living document, not a static introduction; it must keep pace with what the wiki actually contains.
+
+## Core Principle
+The overview is the wiki's executive summary for both humans and agents. It is the page a new reader (or a fresh agent session) reads first to orient themselves. When it drifts out of sync with the wiki's actual content, every downstream operation suffers. This skill is the resync.
+
+The ingest workflow already touches overview as part of every ingestion. Invoke this skill directly when:
+- You want an overview pass without ingesting a new source (after a batch of edits, a query session, or a lint pass)
+- The overview feels stale relative to the wiki
+- The Statistics section is wrong
+- New themes have emerged across pages that aren't reflected here
+
+<workflow>
+
+<step n="1" goal="Read the current overview">
+  <action>Read `wiki/overview.md` in full</action>
+  <action>Note the existing Key Themes, Open Questions, and Evolving Synthesis sections</action>
+  <action>Note the current Statistics — these are about to be recomputed</action>
+</step>
+
+<step n="2" goal="Survey the wiki's actual state">
+  <action>Read `wiki/index.md` to get the catalog of all pages</action>
+  <action>Count pages by type: entities in `wiki/entities/`, concepts in `wiki/concepts/`, sources in `wiki/sources/`, comparisons in `wiki/comparisons/`</action>
+  <action>Skim entity and concept pages with the highest `source_count` — those are the most-supported claims in the wiki and most likely to reflect real themes</action>
+  <action>Scan `wiki/log.md` since the overview's `last_updated` date — what has been added, updated, or flagged?</action>
+  <action>Identify pages with `confidence: disputed` or `status: superseded` — these belong in the overview's nuance, not its main synthesis</action>
+</step>
+
+<step n="3" goal="Recompute the Statistics section">
+  <action>Update the Statistics section of `wiki/overview.md` with current counts:</action>
+  <action>- Total pages (sum across all wiki subdirectories, excluding overview/index/log)</action>
+  <action>- Entities count</action>
+  <action>- Concepts count</action>
+  <action>- Sources ingested count</action>
+  <action>- Comparisons count</action>
+  <action>- Last updated: today's ISO date</action>
+</step>
+
+<step n="4" goal="Refresh Key Themes">
+  <action>Identify themes that have emerged or strengthened — patterns that appear across multiple pages with strong source backing</action>
+  <action>Each theme is 1-2 sentences describing the pattern, with {{config.wiki.cross_ref_style}} links to the entity/concept pages where it shows up</action>
+  <action>Remove themes that no longer reflect the wiki's content (e.g., the pages supporting them have been superseded or merged away)</action>
+  <action>Preserve nuance — do not flatten contested themes into majority positions; if a theme is disputed, say so</action>
+</step>
+
+<step n="5" goal="Refresh Open Questions">
+  <action>Read existing Open Questions. For each, check whether the wiki has accumulated enough material to answer it</action>
+  <check if="a question has been substantively answered by recent ingestions or filed answers">
+    <action>Check it off and link to the page(s) that answered it</action>
+  </check>
+  <action>Add new open questions surfaced by recent activity: gaps in coverage, contradictions worth resolving, threads worth pulling on</action>
+  <action>Prefer specific questions over vague ones — "What is the impact of X on Y?" beats "What about X?"</action>
+</step>
+
+<step n="6" goal="Refresh Evolving Synthesis">
+  <action>Rewrite (or revise in place) the Evolving Synthesis section to reflect what the wiki currently knows</action>
+  <action>Structure it around: what we know with high confidence, what remains uncertain or disputed, how the pieces connect, what the emerging picture looks like</action>
+  <action>This is a living summary — it should READ like the wiki's current best understanding, not a chronology of how it got here</action>
+  <action>Do not introduce knowledge that is not present in the wiki — synthesis here must be wiki-backed</action>
+</step>
+
+<step n="7" goal="Log the refresh">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] update-overview | Refreshed overview`</action>
+  <action>Include a brief summary: themes added/removed, questions checked off, questions added, page counts</action>
+</step>
+
+<step n="8" goal="Report">
+  <action>Tell the user what changed in the overview and what they should look at</action>
+  <action>If new Open Questions were added, suggest which ones might be the most productive to investigate next</action>
+  <action>If themes shifted meaningfully, point that out — it usually means the wiki has matured into a new phase</action>
+</step>
+
+</workflow>

@@ -10,7 +10,7 @@
 - **Created**: {{config.project.created}}
 - **Knowledge scale**: {{config.knowledge.scale}}
 
-This is a WikiForge-managed research wiki following the LLM Wiki pattern. This wiki is NOT RAG — sources are not chunked for retrieval. Instead, the LLM **incrementally builds and maintains a persistent wiki** — a structured, interlinked collection of markdown files compiled from raw sources. When a new source is added, the LLM reads it, extracts key information, and integrates it into the existing wiki — updating entity pages, revising topic summaries, noting contradictions, strengthening the evolving synthesis.
+This is a WikiForge-managed LLM Wiki. This wiki is NOT RAG — sources are not chunked for retrieval. Instead, the LLM **incrementally builds and maintains a persistent wiki** — a structured, interlinked collection of markdown files compiled from raw sources. When a new source is added, the LLM reads it, extracts key information, and integrates it into the existing wiki — updating entity pages, revising topic summaries, noting contradictions, strengthening the evolving synthesis.
 
 **The wiki is a compounding artifact.** The cross-references are already built. The contradictions are already flagged. The synthesis already reflects everything ingested. Every source makes the wiki richer; every query can compound back into it. The human curates sources and asks the right questions. The LLM does all the bookkeeping — summarizing, cross-referencing, filing, and maintaining — that makes a knowledge base actually useful over time.
 
@@ -31,7 +31,7 @@ This is a WikiForge-managed research wiki following the LLM Wiki pattern. This w
 ├── raw/                            # Immutable source documents
 │   ├── assets/                     # Images, downloaded media
 {{#if (includes config.knowledge.source_types "documents")}}
-│   ├── documents/                  # PDFs — papers, books, reports
+│   ├── documents/                  # PDFs — papers, books, specs, manuals, reports
 {{/if}}
 {{#if (includes config.knowledge.source_types "articles")}}
 │   ├── articles/                   # Web pages, blog posts
@@ -58,12 +58,12 @@ This is a WikiForge-managed research wiki following the LLM Wiki pattern. This w
 │   ├── config.yaml                 # Runtime config (domain, user, paths)
 │   ├── _config/                    # Manifests (skill, agent, file catalogs)
 │   ├── agents/                     # Agent personas (SKILL.md per agent)
-│   ├── skills/                     # Workflows organized by research phase
+│   ├── skills/                     # Workflows organized by wiki lifecycle phase
 │   │   ├── 1-acquisition/          # Ingest, batch-ingest, web-research
-│   │   ├── 2-compilation/          # Update entities/concepts, cross-reference
+│   │   ├── 2-compilation/          # Update entities/concepts, cross-reference, overview, file-answer
 │   │   ├── 3-analysis/             # Query, compare, adversarial review
-│   │   ├── 4-synthesis/            # Compile output, slides, reports
-│   │   └── maintenance/            # Lint, reindex, stats
+│   │   ├── 4-synthesis/            # Compile output, slides, reports, digest
+│   │   └── maintenance/            # Lint, reindex, stats, resolve-contradiction, supersede, dedup, decay
 │   ├── core/                       # Help and party-mode skills
 │   ├── templates/                  # Page templates
 │   └── tools/                      # CLI helper scripts
@@ -97,7 +97,7 @@ by running its launcher from `.claude/skills/`.
 Run `/wforge-help` at any time to see:
 - Available agents and skills
 - Current wiki state and recommended next actions
-- Research lifecycle phase guidance
+- Wiki lifecycle phase guidance
 
 ## Autonomy Model
 
@@ -110,7 +110,7 @@ This wiki's `ingestion_style` setting governs system-wide workflow autonomy — 
 **Mode: Batch** — Operations process in batches with brief summaries but without stopping for confirmation at each step. The human reviews the cumulative result after the batch completes.
 {{/if}}
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
-**Mode: Autonomous** — The LLM drives the full research cycle with minimal supervision. Agents chain into each other automatically:
+**Mode: Autonomous** — The LLM drives the full ingest cycle with minimal supervision. Agents chain into each other automatically:
 
 **The Autonomous Cycle:**
 1. **Research** (Rex) identifies knowledge gaps and finds high-quality sources
@@ -149,17 +149,27 @@ As the wiki grows past these thresholds, the system becomes progressively more a
 **Audit log:** Every autonomous decision is logged in `wiki/log.md` with the prefix `[AUTO] action | reasoning`. Review this log to audit what the system did and why.
 {{/if}}
 
-## Research Lifecycle
+## Wiki Lifecycle
 
-Workflows are organized into phases that mirror the research process:
+Workflows are organized into phases that mirror the LLM Wiki loop — acquire sources, compile knowledge, analyze it, synthesize outputs, and maintain the whole over time:
 
 | Phase | Skills | Purpose |
 |-------|--------|---------|
 | **1. Acquisition** | ingest-source, batch-ingest, web-research | Bring sources into `raw/`, convert and process |
-| **2. Compilation** | update-entities, update-concepts, cross-reference | Build and maintain wiki pages from sources |
+| **2. Compilation** | update-entities, update-concepts, cross-reference, update-overview, file-answer | Build and maintain wiki pages from sources and from answers worth keeping |
 | **3. Analysis** | query-wiki, generate-comparison, adversarial-review | Extract insights, challenge claims |
-| **4. Synthesis** | compile-output, generate-slides, export-report | Create deliverables from wiki content |
-| **Maintenance** | lint-wiki, reindex, stats | Keep the wiki healthy and organized |
+| **4. Synthesis** | compile-output, generate-slides, export-report, periodic-digest | Create deliverables and recurring summaries from wiki content |
+| **Maintenance** | lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify | Keep the wiki healthy, current, and internally consistent |
+
+## Core Loops (LLM Wiki invariants)
+
+These three loops are what make this a compounding wiki rather than a notes folder. The agents enforce them; users should rarely notice them happening.
+
+1. **Index-first navigation.** When answering or operating on the wiki, start by reading `wiki/index.md`. It is the primary navigation tool — every page is catalogued there with a one-line summary. Drill into specific pages only after the index has narrowed the candidate set.
+
+2. **Answers compound back into the wiki.** Good answers do not disappear into chat history. When a query produces a novel comparison, analysis, or connection, file it back into the wiki as a new page — comparisons into `wiki/comparisons/`, analyses and connections into `wiki/concepts/`. The `file-answer` skill does this; the query-wiki skill ends by offering it (or doing it autonomously, depending on mode).
+
+3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The prefix is intentionally regular so `grep "^## \[" wiki/log.md | tail -N` produces a clean timeline without any extra tooling.
 
 ## Wiki Conventions
 
@@ -172,6 +182,14 @@ All wiki pages must have YAML frontmatter with at minimum:
 - `last_updated`: ISO date
 - `source_count`: number of sources backing this page
 - `confidence`: `high`, `medium`, `low`, or `disputed`
+
+**Lifecycle fields** (set when relevant, omit otherwise):
+- `status`: `current` (default), `superseded`, or `archived`
+- `supersedes`: list of page slugs this page replaces
+- `superseded_by`: slug of the page that replaces this one (set when status is `superseded`)
+- `last_verified`: ISO date the claims on this page were last re-checked against current sources
+
+These fields drive the maintenance workflows (`supersede-claim`, `decay-and-verify`, `resolve-contradiction`). Treat them as part of the page contract, not optional metadata.
 {{else}}
 Frontmatter is disabled for this project.
 {{/if}}

@@ -1,0 +1,82 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Deduplicate
+
+## Goal
+Find and merge duplicate sources and duplicate wiki pages in the {{config.project.name}} wiki, using the `content_hash` field on source summaries as the primary signal.
+
+## Core Principle
+Duplicates erode the wiki's coherence — they fragment cross-references, inflate apparent source counts, and create the illusion of multiple corroborating sources where there is actually one. The wiki's compounding effect depends on each piece of knowledge having exactly one canonical home.
+
+Two kinds of duplicates exist:
+
+1. **Source duplicates**: two source summary pages in `wiki/sources/` describing the same underlying raw source. Detected via matching `content_hash` (the SHA-256 prefix already in source summary frontmatter, currently set during ingest but never compared).
+2. **Page duplicates**: two entity/concept/comparison pages covering the same subject under different names (e.g., `gpt-4` and `gpt4`). Detected via title/alias similarity and overlapping cross-references.
+
+Like supersession, deduplication preserves content — duplicates are merged, not deleted.
+
+<workflow>
+
+<step n="1" goal="Scan for source duplicates">
+  <action>Read every file in `wiki/sources/` and collect their `content_hash` frontmatter values</action>
+  <action>Group pages by hash. Any group with size > 1 is a source-duplicate cluster.</action>
+  <action>Also check sources with missing or empty `content_hash` — flag them but do not auto-merge (they need re-hashing first; suggest a re-ingest)</action>
+</step>
+
+<step n="2" goal="Scan for page duplicates">
+  <action>For entity pages: collect titles and aliases. Cluster by case-insensitive equivalence and by close fuzzy match (e.g., punctuation/space differences, kebab vs. plain). Cross-check with `wiki/index.md`.</action>
+  <action>For concept pages: collect titles. Cluster by case-insensitive equivalence and by close-meaning aliases (e.g., "few-shot learning" and "few-shot prompting" — clarify with the user before merging meaning-overlaps).</action>
+  <action>For comparison pages: collect the `subjects` frontmatter list. Pages with the same set of subjects (regardless of order) are candidates.</action>
+</step>
+
+<step n="3" goal="Triage and confirm">
+  <action>Present the duplicate clusters grouped by type (source / entity / concept / comparison)</action>
+  <action>For each cluster, mark obvious dupes (exact hash match, exact alias match) as **auto-safe**</action>
+  <action>Mark fuzzy-match candidates as **needs-confirmation**</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Autonomous mode: proceed to merge only the auto-safe duplicates. Queue needs-confirmation items for human review and continue.</action>
+{{else}}
+  <action>Present needs-confirmation candidates and ask the user which to merge. Wait for input.</action>
+{{/if}}
+</step>
+
+<step n="4" goal="Merge source duplicates">
+  <action>For each confirmed source-duplicate cluster:</action>
+  <action>- Pick the canonical page (oldest `ingested_at`, or the one with richer body; tie-broken by the page already linked from more places)</action>
+  <action>- Merge unique content from the other pages into the canonical: any unique key takeaways, entities, concepts, quotes</action>
+  <action>- Update the canonical's `source_type` and `last_verified` if the merge introduced clarifications</action>
+  <action>- For each non-canonical page in the cluster: set `status: superseded` and `superseded_by: {canonical-slug}` in frontmatter (re-use the supersession primitive; do NOT delete)</action>
+  <action>- Update every {{config.wiki.cross_ref_style}} link pointing at non-canonical pages to point at the canonical (same rule as supersession: rewrite by default, preserve only when the reference is explicitly historical)</action>
+</step>
+
+<step n="5" goal="Merge page duplicates">
+  <action>For each confirmed entity/concept/comparison-duplicate cluster:</action>
+  <action>- Pick the canonical page (richer content, more inbound links, the slug closer to the wiki's naming conventions)</action>
+  <action>- Merge unique sections, citations, and aliases from the others into the canonical</action>
+  <action>- For non-canonical pages: invoke `wforge-supersede-claim` for each — that skill handles the frontmatter, body callout, cross-reference rewriting, and logging</action>
+  <action>- Do not duplicate supersession logic here; let the supersede-claim skill own it</action>
+</step>
+
+<step n="6" goal="Recount affected pages">
+  <action>For pages that absorbed merges, recompute `source_count` in their frontmatter — it should now reflect the union of source citations, deduplicated</action>
+  <action>Update `last_updated` on each merged-into page</action>
+</step>
+
+<step n="7" goal="Log the operation">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] deduplicate | {N} clusters merged`</action>
+  <action>Include a breakdown by type (sources/entities/concepts/comparisons), counts of pages merged, counts of cross-references rewritten</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Prefix with `[AUTO]` for merges done autonomously. Always list needs-confirmation items the user must triage.</action>
+{{/if}}
+</step>
+
+<step n="8" goal="Report and suggest follow-up">
+  <action>Summarize what was merged. Call out any needs-confirmation duplicates that were skipped.</action>
+  <action>If many sources were duplicates, suggest examining the ingestion workflow — duplicates at the source level usually mean URL/path normalization is failing during ingest</action>
+  <action>If pages were merged at scale, suggest running `wforge-reindex` and `wforge-update-overview` afterward — the wiki topology has shifted</action>
+</step>
+
+</workflow>

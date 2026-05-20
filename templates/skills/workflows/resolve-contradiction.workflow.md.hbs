@@ -1,0 +1,84 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Resolve Contradiction
+
+## Goal
+Take a flagged contradiction in the {{config.project.name}} wiki and turn it into a reconciled state — not by erasing one side, but by producing an audit-trailed resolution: annotation, supersession, or split.
+
+## Core Principle
+The lint workflow *detects* contradictions; this workflow *resolves* them. Resolution does not mean picking a winner — it means the wiki should never carry a silent disagreement. Every contradiction ends in one of four states:
+
+| Outcome | When | What happens |
+|---|---|---|
+| **Annotated** | The disagreement is real and unresolved | Both claims remain, both flagged `confidence: disputed`, a comparison page documents the dispute |
+| **Superseded** | One claim is from a newer, more authoritative source that genuinely replaces the other | Older claim's page gets `status: superseded`, `superseded_by` is set, claim moves to history |
+| **Split** | The claims actually describe different things conflated under one name | Page is split into two with disambiguating slugs, cross-references updated |
+| **Reconciled** | The disagreement was apparent, not real (different framings, units, scopes) | Both pages updated to make the framing explicit; contradiction flag removed |
+
+Doubt is never manufactured. If the disagreement turns out to be apparent rather than real, reconcile it — do not preserve a fake dispute.
+
+<workflow>
+
+<step n="1" goal="Locate the contradiction">
+  <action>If invoked with a specific page or claim, jump to step 2</action>
+  <action>Otherwise, scan the wiki for pages with `confidence: disputed` or WARNING callouts</action>
+  <action>Read `wiki/log.md` for recent `[AUTO] query-contradiction` or `ingest | ... contradictions found` entries</action>
+  <action>Pick one contradiction to resolve in this pass — do NOT batch-resolve multiple distinct contradictions in one operation; each deserves individual judgement</action>
+</step>
+
+<step n="2" goal="Reconstruct both sides">
+  <action>Identify the two (or more) wiki pages or sections involved</action>
+  <action>Read each in full</action>
+  <action>For each side, document: the claim, the wiki page making it, the source(s) backing the claim, the date of the underlying source, and the provenance of those sources (primary/secondary, authoritative/anecdotal, etc.)</action>
+  <action>Steelman each side — present the strongest version of the argument before judging</action>
+</step>
+
+<step n="3" goal="Diagnose">
+  <action>Decide which of the four outcomes applies. Use these tests:</action>
+  <action>**Reconciled?** Are the claims really making different statements (different scope, time period, units, definitions)? If yes, the contradiction is apparent — fix the framing in both pages.</action>
+  <action>**Split?** Does the conflict suggest one page is conflating two distinct subjects under one name? If yes, split the page.</action>
+  <action>**Superseded?** Is one side strictly newer AND more authoritative AND covering the same scope? "Newer" alone is not enough — the source must dominate the older one on provenance too.</action>
+  <action>**Annotated?** None of the above — the disagreement is real and unresolved, and the wiki should reflect that honestly.</action>
+</step>
+
+<step n="4" goal="Apply the resolution">
+  <check if="outcome is Reconciled">
+    <action>Rewrite the affected sections on both pages to make scope/units/definitions explicit. Remove `confidence: disputed`. Drop the WARNING callouts.</action>
+    <action>Briefly explain on both pages why this is not a real contradiction.</action>
+  </check>
+  <check if="outcome is Split">
+    <action>Create the new page(s) with disambiguating slugs (e.g., `transformer-architecture` vs `transformer-electrical-device`). Use appropriate templates.</action>
+    <action>Move content from the original page into the splits</action>
+    <action>Update `wiki/index.md` to list both new pages</action>
+    <action>Update every {{config.wiki.cross_ref_style}} link that pointed at the original page to point at whichever split it actually meant — search the whole wiki</action>
+    <action>Leave the original slug as a brief disambiguation page that lists the splits, or delete it cleanly if no links point at it anymore</action>
+  </check>
+  <check if="outcome is Superseded">
+    <action>Invoke `wforge-supersede-claim` with the older and newer pages — that skill owns supersession mechanics (frontmatter, archival, audit). Do not duplicate that logic here.</action>
+  </check>
+  <check if="outcome is Annotated">
+    <action>Ensure both pages have `confidence: disputed` set</action>
+    <action>Ensure both pages have a WARNING callout documenting both positions with citations</action>
+    <action>Create a comparison page in `wiki/comparisons/` that lays out both sides side-by-side — invoke `wforge-file-answer` if it doesn't already exist. This is the wiki's record of the dispute.</action>
+    <action>Cross-link both source pages to the new comparison page bidirectionally</action>
+  </check>
+</step>
+
+<step n="5" goal="Log the resolution">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] resolve-contradiction | {outcome} | {pages involved}`</action>
+  <action>Include: which pages, which outcome, brief reasoning, sources cited</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Prefix with `[AUTO]` if this is part of an autonomous cycle. Note: autonomous resolution is limited to **Reconciled** outcomes — Split, Superseded, and Annotated outcomes change page topology and should not happen without human review. For those, log the diagnosis and queue them for human attention instead of auto-applying.</action>
+{{/if}}
+</step>
+
+<step n="6" goal="Report">
+  <action>Tell the user which contradiction was addressed, which outcome was chosen, and why</action>
+  <action>If the outcome was Annotated, name the comparison page that now documents the dispute — and consider suggesting `wforge-adversarial-review` if the debate agent is enabled</action>
+  <action>If there are more flagged contradictions in the wiki, list them but do NOT auto-resolve — each is its own decision</action>
+</step>
+
+</workflow>
