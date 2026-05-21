@@ -95,7 +95,7 @@ presets/                # Community preset YAML files
 ```
 my-research-wiki/
 ├── CLAUDE.md                          # Schema file (or .cursorrules / AGENTS.md)
-├── wikiforge.yaml                     # Frozen config
+├── wikiforge.yaml                     # Boot config (re-generate with wforge; revise live via wforge-revise-schema)
 ├── .claude/skills/                    # IDE launchers (thin stubs)
 │   ├── wforge-agent-ingestion.md      # → .forge/agents/wforge-agent-ingestion/
 │   ├── wforge-ingest-source.md        # → .forge/skills/1-acquisition/...

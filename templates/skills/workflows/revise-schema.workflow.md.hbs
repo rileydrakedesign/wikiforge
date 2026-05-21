@@ -1,0 +1,98 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Revise Schema
+
+## Goal
+Propose a revision to the schema file (`CLAUDE.md` / `AGENTS.md` / `.cursorrules`) based on observed friction in how the {{config.project.name}} wiki has actually been used. The schema is a living document — the user and the LLM co-evolve it as they discover what works for the domain.
+
+## Core Principle
+A scaffolded schema is a *first guess*. After dozens of ingests, queries, and lint passes, real conventions emerge that the original schema did not anticipate — new page types the user kept creating, frontmatter fields that turned out to matter, agent principles that were repeatedly bent or ignored. This skill surfaces those patterns and proposes a schema update so the next session starts from what was learned, not from the initial guess.
+
+**Never write the schema without user approval.** This skill produces a diff proposal; the user accepts, rejects, or edits before anything is written.
+
+<workflow>
+
+<step n="1" goal="Identify the active schema file">
+  <action>From `.forge/config.yaml`, read the agent tool setting (or infer from which schema file exists at the project root)</action>
+  <action>The active schema file is one of: `CLAUDE.md`, `AGENTS.md`, `.cursorrules`. Read it in full.</action>
+  <action>Note its structure: headings, sections that look frozen-in-time, sections that have been edited by hand since scaffolding</action>
+</step>
+
+<step n="2" goal="Find the last revision marker">
+  <action>Scan `wiki/log.md` for the most recent entry matching `revise-schema | `. The marker line looks like `## [ISO-timestamp] revise-schema | sections updated: X, Y, Z`.</action>
+  <check if="a previous revise-schema entry exists">
+    <action>Set REVIEW_SINCE = that entry's timestamp. Only consider log entries since then as friction signals.</action>
+  </check>
+  <check if="no previous revise-schema entry exists">
+    <action>Set REVIEW_SINCE = wiki creation date (from `.forge/config.yaml` or earliest log entry). Consider all log entries.</action>
+  </check>
+</step>
+
+<step n="3" goal="Scan the wiki for ad-hoc page types">
+  <action>List the actual subdirectories under `wiki/` and compare to what the schema's Directory Structure section declares</action>
+  <action>For each subdirectory that exists on disk but is not in the schema, count its pages and note the dominant frontmatter shape</action>
+  <action>Record: "Schema does not document `wiki/X/` ({N} pages); proposed addition: declare page type X with frontmatter fields [...]"</action>
+</step>
+
+<step n="4" goal="Scan log.md for friction patterns">
+  <action>Read all `## [ISO]` entries since REVIEW_SINCE</action>
+  <action>Look for recurring friction signals:</action>
+  <action>- Repeated `[AUTO] query-contradiction` or `resolve-contradiction` entries about the same topic → the schema may need clearer guidance on contested claims in that area</action>
+  <action>- Repeated stub creation in a directory the schema doesn't mention → confirms ad-hoc page type</action>
+  <action>- `file-answer` entries that landed in non-standard directories → answer-shape routing may need a new branch</action>
+  <action>- `lint-wiki` reports flagging the same convention violation repeatedly → the convention is unclear or unrealistic; either tighten the schema or relax the rule</action>
+</step>
+
+<step n="5" goal="Audit frontmatter usage vs declared schema">
+  <action>Sample 10 recent pages across `wiki/entities/`, `wiki/concepts/`, `wiki/sources/`, `wiki/comparisons/`</action>
+  <action>For each, list every frontmatter field actually present</action>
+  <action>Compare to what the schema's "Wiki Conventions → Frontmatter" section declares as required/expected</action>
+  <action>Record: fields that appear on most pages but are not declared (candidates to add to the contract); fields the schema requires but rarely appear (candidates to demote or remove)</action>
+</step>
+
+<step n="6" goal="Audit agent principles vs observed behavior">
+  <action>For each enabled agent, read its persona file under `.forge/agents/wforge-agent-{type}/SKILL.md`</action>
+  <action>Cross-reference the principles list against recent `[AUTO]` log entries from that agent (if any)</action>
+  <action>Identify principles that were violated or routinely bypassed — these are candidates to revise, remove, or sharpen</action>
+</step>
+
+<step n="7" goal="Compose a diff proposal">
+  <action>Build a structured proposal with sections that mirror the schema's headings. For each proposed change, show:</action>
+  <action>- **Where**: the schema heading and current text being modified</action>
+  <action>- **Change**: insert / modify / remove</action>
+  <action>- **Proposed text**: the new content</action>
+  <action>- **Evidence**: the log entries, page counts, or convention violations that motivate the change</action>
+  <action>Group proposals by category: New page types, Frontmatter contract updates, Agent principle revisions, Convention clarifications, Removals</action>
+  <action>If no significant friction was found, say so explicitly — do not invent changes. A clean diff is a valid outcome.</action>
+</step>
+
+<step n="8" goal="Present and seek approval">
+  <action>Display the diff proposal to the user, organized by category, with evidence inline</action>
+  <action>For each proposed change, the user may accept, reject, or revise</action>
+  <action>WAIT for the user's decisions. Do not write the schema file until approval is explicit.</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Even in autonomous mode, schema revisions require explicit human approval — the schema is the meta-contract and changing it autonomously would mean the system rewrites its own rules without supervision. This is deliberately outside the autonomous envelope.</action>
+{{/if}}
+</step>
+
+<step n="9" goal="Apply the approved changes">
+  <action>Edit the schema file in place with the accepted changes only</action>
+  <action>Preserve existing structure where unchanged; never rewrite the whole file unless explicitly asked</action>
+  <action>If the change affects generated page templates, surface the implication: WikiForge templates would need an upstream update for new scaffolds to inherit the change (this skill only updates the existing schema)</action>
+</step>
+
+<step n="10" goal="Log the revision">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] revise-schema | sections updated: {comma-separated section names}`</action>
+  <action>Include a brief bullet list of the changes that were applied, with one line of evidence each</action>
+</step>
+
+<step n="11" goal="Report">
+  <action>Tell the user what was changed in the schema, which sections, and what evidence drove each change</action>
+  <action>Suggest follow-ups: re-scaffolding upstream templates if the change is fundamental, sharing the schema diff with collaborators on the wiki, or running `wforge-lint-wiki` to check whether any existing pages are now out of contract</action>
+  <action>The schema is now closer to how the wiki is actually used — the next session starts from learned conventions, not initial guesses.</action>
+</step>
+
+</workflow>

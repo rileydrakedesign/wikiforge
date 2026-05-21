@@ -107,7 +107,7 @@ async function generate(
       s.stop("Created .obsidian/ vault config");
     }
 
-    // 12. Save frozen config
+    // 12. Save boot config (regenerable; schema co-evolves at runtime)
     s.start("Saving configuration");
     const yamlContent = YAML.stringify(config);
     await writeFile(

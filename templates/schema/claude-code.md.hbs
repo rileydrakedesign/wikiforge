@@ -19,7 +19,7 @@ This is a WikiForge-managed LLM Wiki. This wiki is NOT RAG — sources are not c
 ```
 .
 ├── CLAUDE.md                       # This file — project schema
-├── wikiforge.yaml                  # Frozen config (re-generate with wforge)
+├── wikiforge.yaml                  # Boot config (re-generate with wforge; schema co-evolves via wforge-revise-schema)
 ├── wiki/
 │   ├── index.md                    # Master page index
 │   ├── log.md                      # Operation log (append-only)
@@ -153,6 +153,18 @@ As the wiki grows past these thresholds, the system becomes progressively more a
 **Audit log:** Every autonomous decision is logged in `wiki/log.md` with the prefix `[AUTO] action | reasoning`. Review this log to audit what the system did and why.
 {{/if}}
 
+### Mode override (per-invocation)
+
+The `ingestion_style` setting in `.forge/config.yaml` is a **default**, not a constraint. Any workflow may be invoked with a `--mode` flag that overrides the default for that call only:
+
+- `--mode deliberate` — stop for human approval at every decision point
+- `--mode batch` — process in batches, no stopping at each step
+- `--mode autonomous` — chain fully autonomously (subject to maturity guards)
+
+This makes supervision a **per-conversation choice**, not a global setting. Want to ingest one source carefully on an otherwise autonomous wiki? `/wforge-ingest-source --mode deliberate`. Want to batch-run lint without auto-fixing? `/wforge-lint-wiki --report-only` (the lint-specific flag) or `--mode deliberate` to also stop for confirmation on suggested fixes.
+
+When a workflow's prompt branches on `ingestion_style`, treat the override as: "if an invocation override is given, follow that branch; otherwise follow the config default."
+
 ## Wiki Lifecycle
 
 Workflows are organized into phases that mirror the LLM Wiki loop — acquire sources, compile knowledge, analyze it, synthesize outputs, and maintain the whole over time:
@@ -174,6 +186,10 @@ These three loops are what make this a compounding wiki rather than a notes fold
 2. **Answers compound back into the wiki.** Good answers do not disappear into chat history. When a query produces a novel comparison, analysis, or connection, file it back into the wiki as a new page — comparisons into `wiki/comparisons/`, analyses and connections into `wiki/concepts/`. The `file-answer` skill does this; the query-wiki skill ends by offering it (or doing it autonomously, depending on mode).
 
 3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The prefix is intentionally regular so `grep "^## \[" wiki/log.md | tail -N` produces a clean timeline without any extra tooling.
+
+## The schema co-evolves
+
+This file is a *first guess* about how the {{config.project.name}} wiki should work. As you and the LLM accumulate sources, queries, and lint passes, real conventions emerge — new page types you keep creating, frontmatter fields that turn out to matter, agent principles you find yourself bending. When that happens, run `/wforge-revise-schema` to propose a structured update based on observed friction (the LLM scans `wiki/log.md` and the actual wiki state, then presents a diff for your approval). The schema is not frozen; it is the contract you and the LLM revise together as you learn what the domain needs.
 
 ## Wiki Conventions
 

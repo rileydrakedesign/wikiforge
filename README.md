@@ -53,7 +53,7 @@ You'll be guided through a questionnaire to configure your project, then WikiFor
 ```
 my-wiki/
 ├── CLAUDE.md                 # Schema file for your LLM tool
-├── wikiforge.yaml            # Frozen config (re-run anytime)
+├── wikiforge.yaml            # Boot config (re-run wforge anytime)
 ├── .forge/
 │   ├── agents/               # Agent personas (SKILL.md per agent)
 │   ├── skills/               # Workflows organized by lifecycle phase

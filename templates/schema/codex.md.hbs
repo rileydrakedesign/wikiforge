@@ -40,12 +40,20 @@ You are a knowledge assistant managing a WikiForge-generated LLM Wiki.
 4. **Synthesis**: compile-output, generate-slides, export-report, periodic-digest
 5. **Maintenance**: lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify
 
+## Mode Override
+
+Workflows accept a per-invocation `--mode` flag (`deliberate` | `batch` | `autonomous`) that overrides `ingestion_style` from config for that call only. Treat config as the default; the flag is authoritative.
+
 ## Core Loops
 
 - **Index-first**: read `wiki/index.md` before searching individual pages.
 - **Answers compound**: file novel synthesis back into the wiki via `file-answer`.
 - **Parseable log**: append every operation to `wiki/log.md` as `## [ISO-timestamp] operation | title`.
 - **Lifecycle frontmatter**: maintain `status`, `supersedes`, `superseded_by`, `last_verified` when claims change.
+
+## Schema co-evolves
+
+This file is a first guess. Run `wforge-revise-schema` to propose updates based on observed friction (ad-hoc page types, frontmatter drift, principles routinely bent). Diff presented for human approval before any write.
 
 ## Conventions
 
