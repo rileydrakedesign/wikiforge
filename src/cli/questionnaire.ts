@@ -339,6 +339,7 @@ export async function runQuestionnaire(): Promise<WikiForgeConfig> {
         ? "wikilink"
         : "markdown-link",
     },
+    maturity: { ...DEFAULT_CONFIG.maturity },
   };
 
   return { ...config, _initGit: initGit as boolean } as WikiForgeConfig & {

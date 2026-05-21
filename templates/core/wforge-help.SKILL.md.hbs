@@ -67,9 +67,9 @@ Or go directly:
   /wforge-batch-ingest — Drop multiple files into raw/ and batch process them
 
 MATURITY THRESHOLDS:
-  ☐ 3+ sources  → Rex can autonomously find and ingest new sources
-  ☐ 5+ entities/concepts → Diana can autonomously review claims
-  ☐ 3+ pages contributing to a query → Quinn auto-saves novel synthesis
+  ☐ {{config.maturity.research_sources_min}}+ sources  → Rex can autonomously find and ingest new sources
+  ☐ {{config.maturity.review_pages_min}}+ entities/concepts → Diana can autonomously review claims
+  ☐ {{config.maturity.synthesis_pages_min}}+ pages contributing to a query → Quinn auto-saves novel synthesis
 
   /wforge-help — Show this help again at any time
 ```
@@ -106,12 +106,12 @@ Present:
 Your wiki has [N] sources ingested but the knowledge hasn't been fully compiled yet. (Autonomous mode)
 
 MATURITY STATUS (fill in based on Step 2 counts):
-  [_] 3+ sources  → Rex autonomous research (check: ☑ if met, ☐ if not)
-  [_] 5+ entities/concepts → Diana autonomous review (check: ☑ if met, ☐ if not)
+  [_] {{config.maturity.research_sources_min}}+ sources  → Rex autonomous research (check: ☑ if met, ☐ if not)
+  [_] {{config.maturity.review_pages_min}}+ entities/concepts → Diana autonomous review (check: ☑ if met, ☐ if not)
 
 RECOMMENDED NEXT STEPS:
 {{#if (includes config.agents.enabled "research")}}
-  [WR] /wforge-web-research — If 3+ sources: Rex runs full autonomous cycle. Otherwise: Rex asks you what to search for.
+  [WR] /wforge-web-research — If {{config.maturity.research_sources_min}}+ sources: Rex runs full autonomous cycle. Otherwise: Rex asks you what to search for.
 {{/if}}
   [IS] /wforge-ingest-source — Ingest another source (autonomous: no confirmation stops)
   [UE] /wforge-update-entities — Create/update entity pages from ingested sources

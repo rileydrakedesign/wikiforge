@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp, rm, readFile, stat } from "node:fs/promises";
+import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +7,7 @@ import YAML from "yaml";
 
 import { DEFAULT_CONFIG } from "../src/config/defaults.js";
 import { AVAILABLE_PRESETS } from "../src/config/presets.js";
+import { loadConfigFromFile } from "../src/cli/from-config.js";
 import type { WikiForgeConfig } from "../src/config/schema.js";
 
 import { createDirectoryStructure } from "../src/generator/scaffold.js";
@@ -102,11 +103,12 @@ describe("Scaffold smoke test", () => {
 
   for (const preset of AVAILABLE_PRESETS) {
     it(`scaffolds preset "${preset.name}" (${preset.filename}) without errors`, async () => {
-      const rawYaml = await readFile(
+      // Go through the actual loader so missing fields (e.g. maturity in
+      // older preset files) get backfilled from DEFAULT_CONFIG the same way
+      // the production CLI does it.
+      const cfg = await loadConfigFromFile(
         path.join(PRESETS_DIR, preset.filename),
-        "utf-8",
       );
-      const cfg = YAML.parse(rawYaml) as WikiForgeConfig;
       // Presets ship with empty project.created; tests need a stable value.
       cfg.project.created = cfg.project.created || "2026-05-21";
       // Slug the project name so collisions across iterations don't happen.

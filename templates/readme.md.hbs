@@ -96,9 +96,9 @@ Rex (research) → Iris (ingest) → Leo (cross-ref + reindex) → Linus (lint) 
 Queries auto-save novel synthesis. Contradictions are auto-flagged. All autonomous decisions are logged with `[AUTO]` prefix in `wiki/log.md`.
 
 **Bootstrap phase**: The system needs a foundation before going fully autonomous:
-- **3+ sources** → Rex can autonomously find and ingest new sources
-- **5+ entity/concept pages** → Diana can autonomously review claims
-- **3+ pages in a query** → Quinn auto-saves synthesis
+- **{{config.maturity.research_sources_min}}+ sources** → Rex can autonomously find and ingest new sources
+- **{{config.maturity.review_pages_min}}+ entity/concept pages** → Diana can autonomously review claims
+- **{{config.maturity.synthesis_pages_min}}+ pages in a query** → Quinn auto-saves synthesis
 
 Below these thresholds, the system falls back to asking you for direction.
 {{/if}}
