@@ -1,8 +1,8 @@
 version: 1
 project:
-  name: "continuous-research"
+  name: "autonomous-wiki"
   domain: ""
-  description: "Autonomous research agent that discovers, ingests, and maintains a knowledge base with minimal supervision"
+  description: "Autonomous LLM Wiki — agents chain automatically to discover, ingest, cross-reference, and maintain the wiki with minimal supervision"
   created: ""
 
 knowledge:

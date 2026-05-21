@@ -32,9 +32,9 @@ export const AVAILABLE_PRESETS: Preset[] = [
     filename: "personal-knowledge.yaml",
   },
   {
-    name: "Continuous Research",
+    name: "Autonomous Wiki",
     description:
-      "Autonomous mode — agents chain automatically to discover, ingest, and maintain knowledge",
-    filename: "continuous-research.yaml",
+      "Autonomous mode — agents chain automatically to discover, ingest, cross-reference, and maintain the wiki",
+    filename: "autonomous-wiki.yaml",
   },
 ];

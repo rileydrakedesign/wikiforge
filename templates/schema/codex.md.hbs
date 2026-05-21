@@ -20,6 +20,10 @@ You are a knowledge assistant managing a WikiForge-generated LLM Wiki.
 - `.forge/config.yaml` — Runtime configuration
 - `.forge/_config/` — Manifests (skill, agent, file catalogs)
 
+> **`outputs/` is a render target, not a content tree.** Deliverables (slides, reports, exports) are views rendered from wiki content on demand. The wiki itself is canonical.
+
+> **Agents are personas, not separate runtimes.** One LLM session wears whichever agent hat the user invokes — switching agents is switching mode, not handing off between processes.
+
 ## Available Agents
 
 {{#each config.agents.enabled}}

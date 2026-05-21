@@ -1,6 +1,6 @@
 # WikiForge
 
-CLI tool that scaffolds LLM-powered research agent repositories through an interactive terminal questionnaire. Combines Karpathy's LLM Wiki pattern (raw -> wiki -> schema) with BMAD Method-style structured agents and workflows.
+CLI tool that scaffolds an **LLM Wiki** — a compounding, agent-maintained knowledge base — through an interactive terminal questionnaire. Combines Karpathy's LLM Wiki pattern (raw → wiki → schema) with BMAD Method-style structured agents and workflows.
 
 ## Primary Objective
 
@@ -16,6 +16,16 @@ Three-layer knowledge architecture (from LLM Wiki):
 - **The schema** (`CLAUDE.md` / `.cursorrules` / `AGENTS.md`) — configuration telling the LLM how the wiki is structured and what workflows to follow.
 
 WikiForge generates all three layers plus the agent orchestration system (`.forge/` directory).
+
+## Core Loops (LLM Wiki invariants)
+
+Three loops are what make a generated repo a compounding wiki rather than a notes folder. Every change to WikiForge should preserve them:
+
+1. **Index-first navigation.** Agents read `wiki/index.md` first to find candidate pages; they drill into specific pages only after the index narrows the set.
+
+2. **Answers compound back into the wiki.** Novel synthesis produced by `query-wiki` is filed back via `file-answer` — comparisons into `wiki/comparisons/`, analyses into `wiki/concepts/`. This is what makes queries compound, not evaporate.
+
+3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The regular prefix makes the log greppable without extra tooling.
 
 ## Tech Stack
 

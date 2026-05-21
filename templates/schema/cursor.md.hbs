@@ -23,6 +23,10 @@ agents in `.forge/agents/`, skills in `.forge/skills/`.
 - `.forge/_config/` — Manifests (skill, agent, file catalogs)
 - `.cursor/skills/` — IDE launchers
 
+> `outputs/` is a render target — deliverables are views rendered from wiki content. The wiki is canonical.
+
+> Agents are personas, not separate runtimes. One LLM session adopts whichever agent role the user invokes.
+
 ## Available Agents
 
 {{#each config.agents.enabled}}

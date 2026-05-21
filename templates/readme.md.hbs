@@ -103,6 +103,16 @@ Queries auto-save novel synthesis. Contradictions are auto-flagged. All autonomo
 Below these thresholds, the system falls back to asking you for direction.
 {{/if}}
 
+## Core Loops (LLM Wiki invariants)
+
+Three loops make this a compounding wiki rather than a notes folder. The agents enforce them; you should rarely notice them happening.
+
+1. **Index-first navigation.** Read `wiki/index.md` before searching individual pages. It is the primary navigation tool — every page is catalogued there with a one-line summary. Drill into specific pages only after the index has narrowed the candidate set.
+
+2. **Answers compound back into the wiki.** Good answers do not disappear into chat history. When a query produces a novel comparison, analysis, or connection, it is filed back into the wiki as a new page via the `file-answer` skill — comparisons into `wiki/comparisons/`, analyses and connections into `wiki/concepts/`.
+
+3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The prefix is intentionally regular so `grep "^## \[" wiki/log.md | tail -N` produces a clean timeline without any extra tooling.
+
 ## Wiki Conventions
 
 | Setting | Value |

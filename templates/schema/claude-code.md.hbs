@@ -70,7 +70,11 @@ This is a WikiForge-managed LLM Wiki. This wiki is NOT RAG — sources are not c
 └── .claude/skills/                 # IDE launchers (load agents/skills)
 ```
 
+> **`wiki/` is canonical. `outputs/` is a render target.** Slides, reports, and exports are *views* of the wiki, not separate documents — generated on demand from wiki content. The wiki is the deliverable; `outputs/` is what you ship to people who don't read wikis.
+
 ## Agent System
+
+> **Agents are personas, not separate runtimes.** One LLM session adopts the role of whichever agent is invoked — switching agents is switching modes (principles, checklists, capabilities), not handing off between processes. There is no inter-agent orchestration layer to worry about; the LLM simply changes hats when a launcher is run.
 
 This wiki uses specialized agents defined in `.forge/agents/`. Each agent has
 a persona, capabilities menu, and activation instructions. Activate an agent
