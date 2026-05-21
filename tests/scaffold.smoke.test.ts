@@ -24,6 +24,7 @@ import {
 import { generateTools } from "../src/generator/tools.js";
 import { generateReadme } from "../src/generator/readme.js";
 import { generateManifests } from "../src/generator/manifests.js";
+import { generateObsidianConfig } from "../src/generator/obsidian.js";
 import { writeFile } from "node:fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +43,7 @@ async function scaffoldTo(rootDir: string, config: WikiForgeConfig): Promise<voi
   await generateWikiFiles(rootDir, config);
   await generateTools(rootDir, config);
   await generateReadme(rootDir, config);
+  await generateObsidianConfig(rootDir, config);
   await writeFile(
     path.join(rootDir, "wikiforge.yaml"),
     YAML.stringify(config),
@@ -148,6 +150,22 @@ describe("Scaffold smoke test", () => {
         await assertNonEmptyFile(
           path.join(agentDir, "SKILL.md"),
           `${preset.filename}: agent ${agentType} SKILL.md`,
+        );
+      }
+
+      // .obsidian/ vault config when obsidian output is selected
+      if (cfg.workflows.outputs.includes("obsidian")) {
+        await assertNonEmptyFile(
+          path.join(rootDir, ".obsidian/app.json"),
+          `${preset.filename}: .obsidian/app.json`,
+        );
+        await assertNonEmptyFile(
+          path.join(rootDir, ".obsidian/graph.json"),
+          `${preset.filename}: .obsidian/graph.json`,
+        );
+        await assertNonEmptyFile(
+          path.join(rootDir, ".obsidian/core-plugins.json"),
+          `${preset.filename}: .obsidian/core-plugins.json`,
         );
       }
     });

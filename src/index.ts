@@ -25,6 +25,7 @@ import {
 import { generateTools } from "./generator/tools.js";
 import { generateReadme } from "./generator/readme.js";
 import { generateManifests } from "./generator/manifests.js";
+import { generateObsidianConfig } from "./generator/obsidian.js";
 import { initGitRepo, initialCommit } from "./utils/git.js";
 import type { WikiForgeConfig } from "./config/schema.js";
 
@@ -98,6 +99,13 @@ async function generate(
     s.start("Generating README");
     await generateReadme(rootDir, config);
     s.stop("Created README.md");
+
+    // 11b. Generate .obsidian/ vault config (when obsidian output picked)
+    if (config.workflows.outputs.includes("obsidian")) {
+      s.start("Generating Obsidian vault config");
+      await generateObsidianConfig(rootDir, config);
+      s.stop("Created .obsidian/ vault config");
+    }
 
     // 12. Save frozen config
     s.start("Saving configuration");
