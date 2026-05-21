@@ -15,6 +15,10 @@ organization: "{{config.knowledge.organization}}"
 ingestion_style: "{{config.workflows.ingestion_style}}"
 scale: "{{config.knowledge.scale}}"
 frontmatter_enabled: {{config.wiki.frontmatter}}
+source_types:
+{{#each config.knowledge.source_types}}
+  - "{{this}}"
+{{/each}}
 log_file: "wiki/log.md"
 index_file: "wiki/index.md"
 overview_file: "wiki/overview.md"

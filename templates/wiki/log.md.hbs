@@ -4,7 +4,21 @@
 ## [timestamp] action | description
 
 Actions: ingest, create, update, link, compare, lint, query
-Each entry should briefly describe what changed and why. -->
+Each entry should briefly describe what changed and why.
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+
+AUTONOMOUS LOG FORMAT:
+Entries prefixed with [AUTO] are autonomous system actions — not user-initiated.
+Format: [AUTO] action | reasoning
+Examples:
+  [AUTO] query-compound | created wiki/comparisons/x-vs-y.md from synthesis of 3 pages
+  [AUTO] cross-ref-stub | created stub for Entity Name referenced by wiki/sources/article.md
+  [AUTO] adversarial-update | wiki/concepts/claim.md confidence changed from high to contested | conflicting evidence in 2 sources
+  [AUTO] reindex-rename | old-name.md → new-name.md | duplicate resolution
+
+Review [AUTO] entries to audit what the system did autonomously.
+{{/if}}
+-->
 
 ## [{{config.project.created}}] create | Project initialized
 

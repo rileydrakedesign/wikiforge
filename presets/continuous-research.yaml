@@ -1,0 +1,39 @@
+version: 1
+project:
+  name: "continuous-research"
+  domain: ""
+  description: "Autonomous research agent that discovers, ingests, and maintains a knowledge base with minimal supervision"
+  created: ""
+
+knowledge:
+  source_types:
+    - documents
+    - articles
+    - data
+  organization: entity-first
+  scale: medium
+
+agents:
+  tool: claude-code
+  enabled:
+    - ingestion
+    - query
+    - lint
+    - research
+    - debate
+    - librarian
+    - analysis
+  party_mode: false
+
+workflows:
+  ingestion_style: autonomous
+  outputs:
+    - markdown
+  tools:
+    - search
+    - stats
+
+wiki:
+  frontmatter: true
+  citation_format: inline
+  cross_ref_style: wikilink

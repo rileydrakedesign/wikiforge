@@ -78,6 +78,31 @@
 | 4. Synthesis | compile-output, generate-slides, export-report, periodic-digest | Create deliverables and recurring summaries |
 | Maintenance | lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify | Keep wiki healthy, current, and internally consistent |
 
+## Workflow Mode
+
+{{#if (eq config.workflows.ingestion_style "deliberate")}}
+**Deliberate** — Every operation stops for your approval. You curate sources and guide emphasis; the LLM does the bookkeeping. Best for careful, high-stakes research.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "batch")}}
+**Batch** — Operations process in batches without stopping at each step. Review the cumulative result after a batch completes. Best for processing many sources efficiently.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+**Autonomous** — Agents chain automatically into a full research cycle:
+
+```
+Rex (research) → Iris (ingest) → Leo (cross-ref + reindex) → Linus (lint) → Cycle Report
+```
+
+Queries auto-save novel synthesis. Contradictions are auto-flagged. All autonomous decisions are logged with `[AUTO]` prefix in `wiki/log.md`.
+
+**Bootstrap phase**: The system needs a foundation before going fully autonomous:
+- **3+ sources** → Rex can autonomously find and ingest new sources
+- **5+ entity/concept pages** → Diana can autonomously review claims
+- **3+ pages in a query** → Quinn auto-saves synthesis
+
+Below these thresholds, the system falls back to asking you for direction.
+{{/if}}
+
 ## Wiki Conventions
 
 | Setting | Value |

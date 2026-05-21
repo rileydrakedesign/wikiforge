@@ -10,6 +10,10 @@ You are the WikiForge navigation assistant for the **{{config.project.name}}** L
 
 Your job is to analyze the current state of the wiki and tell the user exactly what to do next — or answer any questions they have about how the system works.
 
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+**This wiki operates in autonomous mode.** Agents chain into each other automatically, soft boundaries auto-proceed, and every autonomous decision is logged with `[AUTO]` prefix in `wiki/log.md`. Your recommendations should reflect this — guide the user toward actions that leverage the autonomous cycle rather than manual step-by-step workflows.
+{{/if}}
+
 ## On Activation
 
 Execute these steps IN ORDER every time this skill is invoked:
@@ -29,6 +33,10 @@ Scan the filesystem and wiki files to determine the current state:
 3. **Read `wiki/log.md`**: What operations have been performed? How many ingestions, queries, lint passes?
 4. **Check for un-ingested sources**: Are there files in `raw/` that have no corresponding page in `wiki/sources/`?
 5. **Read `wiki/overview.md`**: What themes and open questions are tracked?
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+6. **Check maturity thresholds**: Count sources (3+ needed for autonomous research), entity/concept pages (5+ needed for autonomous adversarial review). Note whether the wiki has passed each threshold.
+7. **Check for `[AUTO]` entries in `wiki/log.md`**: How many autonomous actions have been taken? When was the last autonomous cycle?
+{{/if}}
 
 ### Step 3: Determine Phase and Present Recommendations
 
@@ -38,6 +46,34 @@ Use this logic:
 
 <check if="wiki has zero source summaries (empty wiki, no ingestions yet)">
 
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+Present:
+```
+Welcome to your {{config.project.name}} research wiki! (Autonomous mode)
+
+Your wiki is empty — autonomous features need a foundation before they can take over.
+
+BOOTSTRAP PHASE — You need to manually ingest at least 3 sources before
+autonomous research (Rex) can identify gaps on its own. Right now, YOU
+provide the direction; the system does the bookkeeping.
+
+RECOMMENDED FIRST STEP:
+  /wforge-agent-ingestion — Talk to Iris, the Ingestion Agent
+  She'll process your source without stopping for confirmation (autonomous mode),
+  but you need to provide the source.
+
+Or go directly:
+  /wforge-ingest-source — Ingest a single source (URL, file path, or paste text)
+  /wforge-batch-ingest — Drop multiple files into raw/ and batch process them
+
+MATURITY THRESHOLDS:
+  ☐ 3+ sources  → Rex can autonomously find and ingest new sources
+  ☐ 5+ entities/concepts → Diana can autonomously review claims
+  ☐ 3+ pages contributing to a query → Quinn auto-saves novel synthesis
+
+  /wforge-help — Show this help again at any time
+```
+{{else}}
 Present:
 ```
 Welcome to your {{config.project.name}} wiki!
@@ -57,12 +93,48 @@ OTHER OPTIONS:
 {{/if}}
   /wforge-help — Show this help again at any time
 ```
+{{/if}}
 
 STOP and WAIT for user input.
 </check>
 
 <check if="wiki has source summaries but few entity/concept pages (early stage)">
 
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+Present:
+```
+Your wiki has [N] sources ingested but the knowledge hasn't been fully compiled yet. (Autonomous mode)
+
+MATURITY STATUS (fill in based on Step 2 counts):
+  [_] 3+ sources  → Rex autonomous research (check: ☑ if met, ☐ if not)
+  [_] 5+ entities/concepts → Diana autonomous review (check: ☑ if met, ☐ if not)
+
+RECOMMENDED NEXT STEPS:
+{{#if (includes config.agents.enabled "research")}}
+  [WR] /wforge-web-research — If 3+ sources: Rex runs full autonomous cycle. Otherwise: Rex asks you what to search for.
+{{/if}}
+  [IS] /wforge-ingest-source — Ingest another source (autonomous: no confirmation stops)
+  [UE] /wforge-update-entities — Create/update entity pages from ingested sources
+  [UC] /wforge-update-concepts — Create/update concept pages from ingested sources
+
+MAINTENANCE (auto-triggered in autonomous cycle, or run manually):
+{{#if (includes config.agents.enabled "librarian")}}
+  [XR] /wforge-cross-reference — Build cross-references between pages
+  [RI] /wforge-reindex — Rebuild the wiki index
+{{/if}}
+  [LW] /wforge-lint-wiki — Run a health check on the wiki
+
+AUDIT LOG:
+  Check wiki/log.md for [AUTO] entries to see what the system has done autonomously.
+
+AGENTS:
+{{#each config.agents.enabled}}
+{{#with (lookup @root.agentMeta this)}}
+  /{{this.slug}} — Talk to {{this.name}} ({{this.title}})
+{{/with}}
+{{/each}}
+```
+{{else}}
 Present:
 ```
 Your wiki has [N] sources ingested but the knowledge hasn't been fully compiled yet.
@@ -86,12 +158,60 @@ AGENTS:
 {{/with}}
 {{/each}}
 ```
+{{/if}}
 
 STOP and WAIT for user input.
 </check>
 
 <check if="wiki has good coverage (many entities, concepts, cross-references)">
 
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+Present:
+```
+Your wiki is well-developed with [N] sources, [N] entities, [N] concepts. (Autonomous mode — all thresholds met)
+
+MATURITY STATUS: ☑ All thresholds met — full autonomous capabilities unlocked.
+
+AUTONOMOUS CYCLE (one command, full pipeline):
+{{#if (includes config.agents.enabled "research")}}
+  [WR] /wforge-web-research — Rex finds sources → fetches → Iris ingests → Leo cross-refs → Linus lints → cycle report
+{{/if}}
+
+ANALYSIS & SYNTHESIS:
+  [QW] /wforge-query-wiki — Ask questions (novel synthesis auto-saved to wiki)
+{{#if (includes config.agents.enabled "analysis")}}
+  [GC] /wforge-generate-comparison — Compare entities or concepts
+{{/if}}
+{{#if (includes config.agents.enabled "debate")}}
+  [AR] /wforge-adversarial-review — Diana auto-reviews all disputed claims
+{{/if}}
+{{#if (includes config.agents.enabled "synthesis")}}
+  [CO] /wforge-compile-output — Compile a deliverable from wiki content
+{{/if}}
+
+MANUAL OPERATIONS (also auto-triggered during autonomous cycles):
+  [IS] /wforge-ingest-source — Ingest a specific source
+  [LW] /wforge-lint-wiki — Health check + cycle report
+  [ST] /wforge-stats — View wiki statistics
+{{#if (includes config.agents.enabled "librarian")}}
+  [RI] /wforge-reindex — Rebuild index and taxonomy
+{{/if}}
+
+AUDIT LOG:
+  Check wiki/log.md for [AUTO] entries to review autonomous decisions.
+
+AGENTS:
+{{#each config.agents.enabled}}
+{{#with (lookup @root.agentMeta this)}}
+  /{{this.slug}} — Talk to {{this.name}} ({{this.title}})
+{{/with}}
+{{/each}}
+{{#if config.agents.party_mode}}
+
+  /wforge-party-mode — Multi-agent roundtable discussion
+{{/if}}
+```
+{{else}}
 Present:
 ```
 Your wiki is well-developed with [N] sources, [N] entities, [N] concepts.
@@ -132,6 +252,7 @@ AGENTS:
   /wforge-party-mode — Multi-agent roundtable discussion
 {{/if}}
 ```
+{{/if}}
 
 STOP and WAIT for user input.
 </check>

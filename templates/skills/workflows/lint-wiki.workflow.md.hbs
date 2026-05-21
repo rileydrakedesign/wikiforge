@@ -102,6 +102,15 @@ If invoked with `--report-only`, **all** fixes are skipped — every finding bec
   <action>Check for source summary pages that reference missing raw files</action>
 </step>
 
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+<step n="7b" goal="Check for stub pages">
+  <action>Scan for wiki pages with `status: stub` in frontmatter — these were auto-created by the cross-reference workflow when broken links pointed to plausible entities/concepts</action>
+  <action>For each stub page, check if it has been filled with real content since creation (content beyond the auto-generated placeholder)</action>
+  <action>Classify stubs: high-priority (referenced by 3+ pages), medium-priority (referenced by 1-2 pages), low-priority (referenced by 0 pages — may be an orphan stub)</action>
+  <action>Report stubs as a separate category in the health report with suggested actions: fill with content from existing sources, or flag as candidates for the next research cycle</action>
+</step>
+{{/if}}
+
 <step n="8" goal="Verify index and overview">
   <action>Ensure every wiki page appears in `wiki/index.md` under the correct category</action>
   <action>Check that index entries match actual page titles</action>
@@ -115,7 +124,7 @@ If invoked with `--report-only`, **all** fixes are skipped — every finding bec
 <step n="9" goal="Compile health report">
   <action>Produce two sections:</action>
   <action>**Fixed** (when REPORT_ONLY is false): grouped by category — frontmatter normalizations, link rewrites, stubs created, missing index entries added, back-links added. Show counts per category and `fixed_count` total.</action>
-  <action>**Unresolved**: grouped by category — Contradictions, Pending Supersessions, Stale Claims, Duplicates, Mentioned-But-Uncreated Pages, Overview Staleness, anything else. For each, include the specific page(s) and the suggested follow-up skill (`wforge-resolve-contradiction`, `wforge-supersede-claim`, `wforge-decay-and-verify`, `wforge-deduplicate`, `wforge-update-overview`).</action>
+  <action>**Unresolved**: grouped by category — Contradictions, Pending Supersessions, Stale Claims, Duplicates, Mentioned-But-Uncreated Pages, {{#if (eq config.workflows.ingestion_style "autonomous")}}Stub Pages, {{/if}}Overview Staleness, anything else. For each, include the specific page(s) and the suggested follow-up skill (`wforge-resolve-contradiction`, `wforge-supersede-claim`, `wforge-decay-and-verify`, `wforge-deduplicate`, `wforge-update-overview`).</action>
   <action>Sort the Unresolved section by severity: errors (contradictions, true dead links) before warnings (stale claims) before suggestions (new pages to create)</action>
   <action>Calculate summary statistics: total pages, fixed_count, unresolved_count, health score (percentage of pages with no unresolved issues), un-ingested sources count</action>
   <check if="REPORT_ONLY is true">
