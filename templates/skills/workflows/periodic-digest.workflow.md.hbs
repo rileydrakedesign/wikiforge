@@ -1,0 +1,77 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# Periodic Digest
+
+## Goal
+Produce a digest of what changed in the {{config.project.name}} wiki over a window of time — typically the last week or month. The digest is a synthesis artifact, written from the wiki's actual operation log and current state, that lets a human re-orient quickly without re-reading everything.
+
+## Core Principle
+The digest is the wiki's "what's new" channel. Like every other answer in this system, it does not invent — it summarizes from `wiki/log.md`, `wiki/overview.md`, and the pages that were created or updated in the window. It is a wiki-backed synthesis, not a memory exercise.
+
+A digest is **not** the same as the living `wiki/overview.md`. The overview is the current best understanding; the digest is the changelog. Both are valid synthesis artifacts.
+
+<workflow>
+
+<step n="1" goal="Determine the window">
+  <action>Read the requested window from the user, or default by scale:</action>
+  <action>- small wikis: weekly</action>
+  <action>- medium wikis: weekly</action>
+  <action>- large wikis: bi-weekly</action>
+  <action>Set WINDOW_START = today minus window length. Set WINDOW_END = today.</action>
+  <action>Confirm the window with the user briefly: "Producing a digest covering {WINDOW_START} to {WINDOW_END}." If they wanted something different, adjust.</action>
+</step>
+
+<step n="2" goal="Read the log for the window">
+  <action>Read `wiki/log.md` and filter for entries with timestamps inside the window — the parseable `## [ISO-timestamp] operation | title` prefix makes this a clean grep</action>
+  <action>Group log entries by operation type: ingest, query, file-answer, lint-wiki, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify, update-overview, web-research, others</action>
+  <action>Count each. Note which sources were ingested, which pages were created or superseded, which contradictions surfaced or resolved.</action>
+</step>
+
+<step n="3" goal="Sample the most-touched pages">
+  <action>From the log, identify the wiki pages most affected during the window — pages that appear in multiple log entries, or pages whose `last_updated` falls inside the window</action>
+  <action>Read those pages (or skim, if there are many). Note what changed in claims, in confidence, in citations.</action>
+  <action>Identify the top 5-10 pages that meaningfully shifted in the window — these will anchor the digest</action>
+</step>
+
+<step n="4" goal="Note shifts in the overview">
+  <action>Read `wiki/overview.md`. Compare its current Key Themes and Open Questions to what they were at WINDOW_START (use `wiki/log.md` `update-overview` entries to reconstruct, or read the git diff if a git repo)</action>
+  <action>Identify: themes that strengthened, themes that emerged, questions that were answered (and how), questions that newly arose</action>
+</step>
+
+<step n="5" goal="Compose the digest">
+  <action>Produce a markdown digest with the following sections. Aim for tight, scannable prose — the digest's value is in being read quickly.</action>
+  <action>**Header**: window dates, total operations, page-count delta (added / superseded / archived).</action>
+  <action>**What was ingested**: bullet list of sources brought in during the window, grouped by source type. For each, link to its source summary and note the headline claim or contribution.</action>
+  <action>**What the wiki learned**: a 1-3 paragraph synthesis of the substantive changes. What did we know at WINDOW_START that we know better now? What new entities, concepts, or comparisons appeared? Anchor each statement to a page link.</action>
+  <action>**What's contested**: any contradictions surfaced in the window. If they were resolved, name the outcome (annotated / split / superseded / reconciled). If they're still open, list them.</action>
+  <action>**Shifts in the overview**: themes that emerged or strengthened, questions answered, questions opened.</action>
+  <action>**Maintenance summary**: lint runs, fixes applied, supersessions, dedups, decay re-verifications. One line per category.</action>
+  <action>**What to look at next**: pull 2-4 items from the current Open Questions in the overview — what's most worth attention in the next window.</action>
+  <action>Cite specific wiki pages throughout using {{config.wiki.cross_ref_style}} style. The digest must be re-derivable from its links.</action>
+</step>
+
+<step n="6" goal="Save the digest">
+  <action>Save to `outputs/exports/digest-{WINDOW_END}.md`</action>
+{{#if (includes config.workflows.outputs "pdf")}}
+  <action>If a PDF version was requested, render to `outputs/reports/digest-{WINDOW_END}.pdf`</action>
+{{/if}}
+{{#if (includes config.workflows.outputs "marp")}}
+  <action>If a slide version was requested, render a Marp deck to `outputs/slides/digest-{WINDOW_END}.md` — but only for digests with meaningful shifts; routine digests are best as text</action>
+{{/if}}
+</step>
+
+<step n="7" goal="Log the digest">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] periodic-digest | {WINDOW_START} → {WINDOW_END}`</action>
+  <action>Include: window, output path, total operations summarized, top pages anchored</action>
+</step>
+
+<step n="8" goal="Report">
+  <action>Present a brief inline summary of the digest highlights to the user — 5-8 bullets</action>
+  <action>Point them to the saved file</action>
+  <action>If meaningful shifts happened in Key Themes, suggest running `wforge-update-overview` to make the overview reflect them; if many pages weakened in confidence, suggest `wforge-decay-and-verify` followed by `wforge-web-research`</action>
+</step>
+
+</workflow>

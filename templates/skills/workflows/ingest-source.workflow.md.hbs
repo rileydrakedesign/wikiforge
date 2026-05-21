@@ -25,7 +25,7 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
     <goto anchor="frontmatter" />
   </check>
 {{#if (includes config.knowledge.source_types "documents")}}
-  <check if="source is a PDF (paper, book, report, whitepaper)">
+  <check if="source is a PDF (paper, book, spec, manual, report, transcript, whitepaper, etc.)">
     <action>Run `.forge/tools/pdf-to-md.py` to convert. Preserve tables, headings, and structure</action>
     <action>Save to `raw/documents/{slug}.md`</action>
   </check>
@@ -166,7 +166,7 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
   <action>Link entities that co-occur in this source to each other, even if they aren't directly related in the text</action>
 </step>
 
-<step n="10" goal="Update overview">
+<step n="10" goal="Update overview (incrementally)">
   <action>Read `wiki/overview.md` and assess whether this source changes the big picture</action>
   <check if="this source introduces a new major theme, shifts an existing theme, or provides significant evidence for/against a listed open question">
     <action>Update the Key Themes section of `wiki/overview.md` to reflect what this source adds</action>
@@ -176,6 +176,9 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
   </check>
   <check if="this source is routine and does not change the big picture">
     <action>Update the Statistics section only</action>
+  </check>
+  <check if="the source touches >5 entity/concept pages OR shifts multiple themes at once">
+    <action>This is broader than an incremental update can absorb cleanly — invoke `wforge-update-overview` for a full refresh instead of editing inline. The standalone skill rereads the whole wiki and rewrites the overview consistently.</action>
   </check>
 </step>
 

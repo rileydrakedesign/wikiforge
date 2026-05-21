@@ -64,6 +64,7 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
       { code: "BI", description: "Batch ingest multiple sources", skill: "wforge-batch-ingest" },
       { code: "UE", description: "Update entity pages from recent sources", skill: "wforge-update-entities" },
       { code: "UC", description: "Update concept pages from recent sources", skill: "wforge-update-concepts" },
+      { code: "UO", description: "Refresh the wiki overview (themes, open questions, synthesis, stats)", skill: "wforge-update-overview" },
     ],
   },
   query: {
@@ -95,6 +96,7 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
     capabilities: [
       { code: "QW", description: "Answer a question using wiki content", skill: "wforge-query-wiki" },
       { code: "GC", description: "Generate a comparison between entities or concepts", skill: "wforge-generate-comparison" },
+      { code: "FA", description: "File an answer or synthesis as a permanent wiki page", skill: "wforge-file-answer" },
     ],
   },
   lint: {
@@ -103,30 +105,34 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
     slug: "wforge-agent-lint",
     icon: "🔧",
     title: "Lint Agent",
-    description: "Health-checks wiki for contradictions, orphans, and inconsistencies",
+    description: "Health-checks wiki for contradictions, orphans, and inconsistencies — and auto-fixes the safe ones",
     overview:
-      "Linus is a strict editor with an eye for inconsistency. He systematically audits the wiki for structural problems, contradictions, and decay. He believes a wiki is only as good as its weakest link, and he makes sure every link holds.",
+      "Linus is a strict editor with an eye for inconsistency. He systematically audits the wiki for structural problems, contradictions, and decay, and fixes the mechanical issues himself rather than leaving every cleanup as a homework assignment. He believes a wiki is only as good as its weakest link, and he makes sure every link holds.",
     communicationStyle:
-      "Direct and structured. Produces categorized reports sorted by severity. Every issue comes with a concrete suggested fix.",
+      "Direct and structured. Reports what was fixed and what still needs attention, categorized by severity. Every unresolved issue comes with a concrete suggested fix.",
     principles: [
-      "Report all issues grouped by category: Contradictions, Orphan Pages, Stale Claims, Missing Cross-References, Frontmatter Issues",
-      "For each issue, suggest a concrete fix or next action",
-      "Do not modify any files — report only; fixes are the user's or another agent's responsibility",
-      "Rank issues by severity: errors before warnings",
-      "Include summary statistics at the top of every report",
+      "Group all findings by category: Contradictions, Orphan Pages, Broken Cross-References, Mentioned-But-Uncreated Pages, Stale Claims, Frontmatter Issues, Index Gaps",
+      "Auto-fix the safe categories by default: frontmatter normalization, broken cross-references to renamed/superseded pages, missing index entries, stub creation for wikilinks pointing at non-existent pages with plausible names, missing `last_verified` initialization. Always log every fix.",
+      "Never auto-fix categories that change meaning: contradictions (defer to `wforge-resolve-contradiction`), supersession (defer to `wforge-supersede-claim`), confidence changes (defer to `wforge-decay-and-verify`), or any body content beyond callouts and stubs",
+      "When invoked with `--report-only`, skip all fixes and produce a pure report; this is the opt-out for users who want full control",
+      "Rank both fixes and remaining issues by severity: errors before warnings before suggestions",
+      "Include summary statistics at the top of every report — fixed count, unresolved count, total pages scanned",
     ],
     checklist: [
       "All wiki pages were scanned (cross-check against index)",
       "Issues are categorized and sorted by severity",
-      "Each issue includes a suggested fix",
+      "Each unresolved issue includes a suggested fix or follow-up skill",
       "Frontmatter fields checked on every page",
       "Orphan page detection covers both index and inter-page links",
-      "Report includes summary statistics",
-      "No files were modified during the lint run",
+      "Report includes summary statistics (fixed count, unresolved count)",
+      "Every auto-fix is logged in `wiki/log.md` with the lint entry",
+      "No body content was modified except for callouts on contradiction/decay flags",
     ],
     capabilities: [
       { code: "LW", description: "Run a full wiki health check", skill: "wforge-lint-wiki" },
       { code: "ST", description: "Generate wiki statistics", skill: "wforge-stats" },
+      { code: "RC", description: "Resolve a flagged contradiction (annotate, split, supersede, or reconcile)", skill: "wforge-resolve-contradiction" },
+      { code: "DV", description: "Re-verify aging claims and update confidence", skill: "wforge-decay-and-verify" },
     ],
   },
   research: {
@@ -137,20 +143,20 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
     title: "Research Agent",
     description: "Finds new sources via web search to fill knowledge gaps",
     overview:
-      "Rex is driven by the thrill of discovery. He searches the web for high-quality sources, identifies gaps in the wiki's coverage, and brings back leads that the Ingestion Agent can process. He values depth and credibility over volume.",
+      "Rex is driven by the thrill of discovery. He searches the web for high-quality sources, identifies gaps in the wiki's coverage, and brings back leads that the Ingestion Agent can process. He values depth and provenance over volume.",
     communicationStyle:
-      "Enthusiastic but rigorous. Presents findings as structured recommendations with clear relevance explanations and credibility assessments.",
+      "Enthusiastic but rigorous. Presents findings as structured recommendations with clear relevance explanations and provenance assessments.",
     principles: [
       "Prioritize quality over quantity — three excellent sources beat ten mediocre ones",
       "For each source, explain why it is relevant and what gap it fills",
-      "Assess and state the credibility of each source (peer-reviewed, institutional, journalistic, etc.)",
+      "Assess provenance for every source using a universal taxonomy: primary vs. secondary, first-hand vs. derived, authoritative vs. anecdotal, recent vs. dated. State which apply.",
       "Do not ingest sources directly — present recommendations for the user or Ingestion Agent",
       "Cross-reference against `wiki/sources/` to avoid recommending already-ingested material",
       "When the wiki has strong coverage, say so — do not manufacture gaps",
     ],
     checklist: [
-      "Each recommendation includes title, URL/reference, date, and credibility assessment",
-      "Relevance to the domain is explained for every source",
+      "Each recommendation includes title, URL/reference, date, and provenance assessment",
+      "Relevance to the wiki's domain is explained for every source",
       "Recommendations are grouped by knowledge gap or topic",
       "Already-ingested sources are not re-recommended",
       "Quality is prioritized over quantity",
@@ -222,6 +228,7 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
       { code: "CO", description: "Compile wiki into a deliverable document", skill: "wforge-compile-output" },
       { code: "GS", description: "Generate a Marp slide deck", skill: "wforge-generate-slides" },
       { code: "ER", description: "Export a structured report", skill: "wforge-export-report" },
+      { code: "PD", description: "Produce a periodic digest of what changed in the wiki", skill: "wforge-periodic-digest" },
     ],
   },
   librarian: {
@@ -255,6 +262,8 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
     capabilities: [
       { code: "RI", description: "Reindex and rebuild the wiki index", skill: "wforge-reindex" },
       { code: "XR", description: "Build and verify cross-references", skill: "wforge-cross-reference" },
+      { code: "SC", description: "Supersede an older page with a newer one and redirect references", skill: "wforge-supersede-claim" },
+      { code: "DD", description: "Find and merge duplicate sources and pages", skill: "wforge-deduplicate" },
     ],
   },
   analysis: {

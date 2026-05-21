@@ -41,7 +41,14 @@ export type OutputFormat =
   | "pdf"
   | "obsidian";
 
-export type ToolOption = "search" | "qmd" | "ingest" | "stats";
+export type ToolOption =
+  | "search"
+  | "qmd"
+  | "ingest"
+  | "stats"
+  | "graph"
+  | "watch"
+  | "diff";
 
 export type CitationFormat = "inline" | "footnote" | "academic";
 

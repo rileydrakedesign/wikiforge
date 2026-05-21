@@ -3,7 +3,7 @@ import type { WikiForgeConfig } from "./schema.js";
 export const DEFAULT_CONFIG: WikiForgeConfig = {
   version: 1,
   project: {
-    name: "my-research-wiki",
+    name: "my-wiki",
     domain: "",
     description: "",
     created: new Date().toISOString().split("T")[0],

@@ -1,0 +1,93 @@
+---
+config: '{project-root}/.forge/config.yaml'
+---
+
+# File Answer
+
+## Goal
+Promote a valuable answer, comparison, analysis, or connection — produced during a query or session — into a permanent wiki page in the {{config.project.name}} wiki. Good answers compound back into the knowledge base; they do not disappear into chat history.
+
+## Core Principle
+This is the loop that makes the wiki compound from queries as well as from sources. A comparison the user asked for, an analysis you ran, a connection you noticed — these are knowledge artifacts every bit as real as an ingested source. Filed correctly, they become part of the wiki's permanent reasoning.
+
+There is no separate "questions" directory. An answer becomes whichever existing page type best fits its shape:
+
+| Answer shape | Filed to | Page template |
+|---|---|---|
+| Side-by-side analysis of 2+ subjects | `wiki/comparisons/` | `comparison-table.md` |
+| Synthesis, framework, or named pattern | `wiki/concepts/` | `concept-page.md` |
+| New named subject (person, org, tool, etc.) discovered through the answer | `wiki/entities/` | `entity-page.md` |
+
+This skill is invoked automatically by `query-wiki` (in autonomous mode) or as a follow-up offer (in deliberate / batch modes). It can also be invoked directly when reviewing a transcript or chat session for material worth preserving.
+
+<workflow>
+
+<step n="1" goal="Identify the answer worth filing">
+  <action>If invoked from `query-wiki`, the answer payload is already in hand — proceed to step 2</action>
+  <action>If invoked directly, ask the user which answer or session segment to file. Read the relevant chat or transcript</action>
+  <action>Decide whether this answer is worth filing. The bar: it drew on at least 2 wiki pages, produced novel synthesis (not just a lookup), and is likely to be useful again. If it fails the bar, say so and stop — do not file every answer.</action>
+</step>
+
+<step n="2" goal="Classify the answer's shape">
+  <action>Determine which page type fits best:</action>
+  <action>- **Comparison**: the answer compares 2+ subjects across attributes. File to `wiki/comparisons/` using `comparison-table.md` template.</action>
+  <action>- **Concept**: the answer is a named synthesis, framework, principle, or pattern that does not yet have a page. File to `wiki/concepts/` using `concept-page.md` template.</action>
+  <action>- **Entity**: the answer introduced a named subject (person, org, tool, place, product) not yet in the wiki. File to `wiki/entities/` using `entity-page.md` template.</action>
+  <action>If the answer is a hybrid (e.g., a comparison that also introduces a new concept), file the primary artifact and create stubs with cross-references for the secondary one</action>
+  <action>If the answer extends an existing page rather than warranting a new one, update the existing page instead and treat this as a page-update operation, not a page-creation operation. Note that in the log.</action>
+</step>
+
+<step n="3" goal="Pick a slug and verify uniqueness">
+  <action>Choose a kebab-case slug that is descriptive and unambiguous (e.g., `transformer-vs-rnn-tradeoffs`, `compounding-knowledge-pattern`)</action>
+  <action>Check `wiki/index.md` and the target directory for collisions</action>
+  <check if="a page with this slug already exists">
+    <action>If it's the same subject, update that page instead of creating a new one — treat this as a page-update operation</action>
+    <action>If it's a different subject with a similar name, pick a more specific slug to disambiguate</action>
+  </check>
+</step>
+
+<step n="4" goal="Create the filed page">
+  <action>Use the appropriate template from `.forge/templates/`</action>
+{{#if config.wiki.frontmatter}}
+  <action>Set frontmatter:</action>
+  <action>- `type`: comparison | concept | entity (matches directory)</action>
+  <action>- `title`: human-readable</action>
+  <action>- `tags`: derived from the originating question and contributing pages</action>
+  <action>- `first_mentioned`: today's date</action>
+  <action>- `source_count`: number of distinct wiki pages that contributed (this is a wiki-derived page, so its "sources" are the contributing pages, not raw sources)</action>
+  <action>- `confidence`: high if all contributing pages were high-confidence and not disputed; medium otherwise; disputed if any contributing claim is itself disputed</action>
+  <action>- `status: current`, `supersedes: []`, `superseded_by: null`, `last_verified` = today</action>
+{{/if}}
+  <action>Write the body using the template's structure. Include the originating question or prompt verbatim in a "Question" or "Origin" subsection so future readers know where this page came from.</action>
+  <action>Cite every claim by linking to the wiki page(s) that contributed using {{config.wiki.cross_ref_style}} style — do NOT introduce outside knowledge. The page must be re-derivable from its citations.</action>
+  <action>If contributing pages have `confidence: disputed`, surface that nuance here — do not flatten</action>
+</step>
+
+<step n="5" goal="Cross-link bidirectionally">
+  <action>For each contributing wiki page, add a {{config.wiki.cross_ref_style}} link back to this new page in an appropriate section (Related Concepts, Related Comparisons, etc.) so the new page is discoverable from its sources</action>
+  <action>If this answer revealed a contradiction between contributing pages, flag it on the contributing pages with a WARNING callout and `confidence: disputed`, and link to this new page as the analysis of the conflict</action>
+</step>
+
+<step n="6" goal="Update index">
+  <action>Add the new page to `wiki/index.md` under the correct category, with a one-line description</action>
+{{#if (includes config.workflows.tools "qmd")}}
+  <action>Run `qmd update` to refresh the search index with the new page</action>
+{{/if}}
+</step>
+
+<step n="7" goal="Log the filing">
+  <action>Append to `wiki/log.md`:</action>
+  <action>Format: `## [ISO-timestamp] file-answer | {page title}`</action>
+  <action>Include: page path, page type, contributing pages (list), originating question, source_count</action>
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+  <action>Prefix with `[AUTO]` if this was triggered by autonomous query compounding</action>
+{{/if}}
+</step>
+
+<step n="8" goal="Report">
+  <action>Tell the user the page was filed, where, and which pages it was derived from</action>
+  <action>If contradictions were flagged on contributing pages during step 5, mention them and suggest `adversarial-review` on those claims if the debate agent is enabled</action>
+  <action>The wiki is now richer than before this query — the answer has compounded back into the knowledge base instead of disappearing</action>
+</step>
+
+</workflow>

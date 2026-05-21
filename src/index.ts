@@ -135,13 +135,13 @@ const program = new Command();
 program
   .name("wforge")
   .description(
-    "Scaffold an LLM-powered research agent repository",
+    "Scaffold an LLM Wiki — a compounding, agent-maintained knowledge base",
   )
   .version(VERSION);
 
 program
   .command("init")
-  .description("Create a new research wiki project")
+  .description("Create a new LLM Wiki project")
   .option("-c, --config <path>", "Generate from a YAML config file")
   .option("--preset <name>", "Use a community preset")
   .option("-y, --yes", "Skip confirmation prompts")

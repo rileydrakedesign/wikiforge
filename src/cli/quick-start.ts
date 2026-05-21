@@ -20,8 +20,8 @@ export async function runQuickStart(): Promise<WikiForgeConfig> {
   handleCancel(projectName);
 
   const domain = await p.text({
-    message: "Research domain/topic:",
-    placeholder: 'e.g., "Agentic AI Systems"',
+    message: "Domain / topic:",
+    placeholder: 'e.g., "Agentic AI", "Our team playbook", "Renaissance art"',
   });
   handleCancel(domain);
 

@@ -48,6 +48,39 @@ const TOOLS: ToolDef[] = [
     condition: (c) => c.knowledge.source_types.includes("articles"),
     executable: false,
   },
+  {
+    file: "download-assets.sh",
+    template: "tools/download-assets.sh.hbs",
+    // Useful whenever sources can carry remote images (articles or media).
+    condition: (c) =>
+      c.knowledge.source_types.includes("articles") ||
+      c.knowledge.source_types.includes("media"),
+    executable: true,
+  },
+  {
+    file: "graph.html",
+    template: "tools/graph.html.hbs",
+    condition: (c) => c.workflows.tools.includes("graph"),
+    executable: false,
+  },
+  {
+    file: "build-graph.sh",
+    template: "tools/build-graph.sh.hbs",
+    condition: (c) => c.workflows.tools.includes("graph"),
+    executable: true,
+  },
+  {
+    file: "watch-raw.sh",
+    template: "tools/watch-raw.sh.hbs",
+    condition: (c) => c.workflows.tools.includes("watch"),
+    executable: true,
+  },
+  {
+    file: "diff-wiki.sh",
+    template: "tools/diff-wiki.sh.hbs",
+    condition: (c) => c.workflows.tools.includes("diff"),
+    executable: true,
+  },
 ];
 
 /**

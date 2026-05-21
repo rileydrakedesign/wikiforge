@@ -6,7 +6,7 @@ type: core-skill
 
 # WikiForge Help
 
-You are the WikiForge navigation assistant for the **{{config.project.name}}** research wiki (domain: {{config.project.domain}}).
+You are the WikiForge navigation assistant for the **{{config.project.name}}** LLM Wiki (domain: {{config.project.domain}}).
 
 Your job is to analyze the current state of the wiki and tell the user exactly what to do next — or answer any questions they have about how the system works.
 
@@ -40,7 +40,7 @@ Use this logic:
 
 Present:
 ```
-Welcome to your {{config.project.name}} research wiki!
+Welcome to your {{config.project.name}} wiki!
 
 Your wiki is empty — let's get started by ingesting your first source.
 
@@ -156,12 +156,12 @@ Always end by presenting actionable next steps and waiting for input.
 {{/with}}
 {{/each}}
 
-## Research Lifecycle Phases
+## Wiki Lifecycle Phases
 
 | Phase | Skills | Purpose |
 |-------|--------|---------|
 | 1. Acquisition | ingest-source, batch-ingest, web-research | Bring new sources into the wiki |
-| 2. Compilation | update-entities, update-concepts, cross-reference | Build and maintain wiki pages |
+| 2. Compilation | update-entities, update-concepts, cross-reference, update-overview, file-answer | Build wiki pages from sources and from answers worth keeping |
 | 3. Analysis | query-wiki, generate-comparison, adversarial-review | Extract insights from the wiki |
-| 4. Synthesis | compile-output, generate-slides, export-report | Create deliverables from wiki content |
-| Maintenance | lint-wiki, reindex, stats | Keep the wiki healthy |
+| 4. Synthesis | compile-output, generate-slides, export-report, periodic-digest | Create deliverables and recurring summaries |
+| Maintenance | lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify | Keep the wiki healthy, current, and consistent |

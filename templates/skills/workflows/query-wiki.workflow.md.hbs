@@ -50,36 +50,33 @@ Good answers can be filed back into the wiki as new pages. A comparison you crea
 </step>
 
 <step n="5" goal="Compound the exploration back into the wiki">
-  <critical>This is a key insight: your explorations should compound in the knowledge base, not disappear into chat history.</critical>
+  <critical>This is a key insight: your explorations should compound in the knowledge base, not disappear into chat history. Filing is delegated to the `wforge-file-answer` skill — there is one canonical filing path for the whole wiki, and this is it.</critical>
   <check if="the answer synthesized multiple pages into a novel comparison, analysis, or connection">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
-    <action>Before auto-saving: verify the synthesis drew from at least 3 wiki pages. If it drew from fewer, the wiki is too thin for reliable autonomous synthesis — offer to save instead of auto-saving, and WAIT for user confirmation</action>
-    <action>If sufficient pages contributed: automatically save the synthesis as a new wiki page — comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`. Create with proper frontmatter, citations, and cross-references to the contributing pages</action>
-    <action>Update `wiki/index.md` with the new page</action>
-    <action>Log the auto-creation in `wiki/log.md` with `[AUTO] query-compound | created {page} from synthesis of {contributing pages}`</action>
+    <action>Maturity check: verify the synthesis drew from at least 3 wiki pages. If it drew from fewer, the wiki is too thin for reliable autonomous synthesis — offer filing to the user via `wforge-file-answer` and WAIT for confirmation instead of auto-filing</action>
+    <action>If sufficient pages contributed: invoke `wforge-file-answer` directly with the answer payload — it will route to `wiki/comparisons/`, `wiki/concepts/`, or `wiki/entities/` by shape, create the page with proper frontmatter and bidirectional cross-references, update the index, and log the creation with `[AUTO]` prefix</action>
 {{else}}
-    <action>Offer to save it as a new page: comparisons go to `wiki/comparisons/`, novel analyses to `wiki/concepts/`</action>
-    <action>If the user agrees, create the page with proper frontmatter, citations, and cross-references to the pages that contributed</action>
-    <action>Update `wiki/index.md` with the new page</action>
-    <action>Log the query and page creation in `wiki/log.md`</action>
+    <action>Offer to invoke `wforge-file-answer` with the answer payload. file-answer will route the page to `wiki/comparisons/`, `wiki/concepts/`, or `wiki/entities/` by shape and handle frontmatter, cross-linking, indexing, and logging</action>
+    <action>If the user declines, do nothing — not every answer is worth filing, and file-answer also enforces a quality bar internally</action>
 {{/if}}
   </check>
   <check if="the answer revealed knowledge gaps">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
-    <action>Automatically add the gaps to the Open Questions section of `wiki/overview.md`</action>
+    <action>Automatically add the gaps to the Open Questions section of `wiki/overview.md` (or invoke `wforge-update-overview` for a full refresh if the wiki has shifted meaningfully)</action>
     <action>Log the additions with `[AUTO] query-gaps | added {count} open questions from query`</action>
 {{else}}
     <action>Suggest specific sources or topics to ingest that would fill these gaps</action>
-    <action>Note gaps as open questions — offer to add them to `wiki/overview.md`</action>
+    <action>Note gaps as open questions — offer to add them to `wiki/overview.md` (or run `wforge-update-overview` for a full refresh)</action>
 {{/if}}
   </check>
   <check if="the answer revealed a contradiction not previously flagged">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
     <action>Automatically flag the contradiction on the relevant wiki pages with `confidence: disputed` and a WARNING callout documenting both positions</action>
     <action>Log the flagging with `[AUTO] query-contradiction | flagged dispute between {page A} and {page B}`</action>
+    <action>Invoke `wforge-resolve-contradiction` to attempt reconciliation — supersession, annotation, or split, as appropriate</action>
 {{else}}
     <action>Offer to flag it on the relevant wiki pages with `confidence: disputed`</action>
-    <action>Suggest running `wforge-adversarial-review` to evaluate the conflicting claims</action>
+    <action>Suggest running `wforge-resolve-contradiction` to reconcile the conflicting claims, or `wforge-adversarial-review` to pressure-test them</action>
 {{/if}}
   </check>
 </step>
