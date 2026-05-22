@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 280" width="820" height="280" role="img" aria-label="WikiForge — Scaffold an LLM Wiki, ready to run">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; }
+      .glow { fill: #22d3ee; opacity: 0.05; }
+      .line {
+        font-family: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace;
+        font-size: 14px;
+        fill: #22d3ee;
+        letter-spacing: 0;
+      }
+      .tagline {
+        font-family: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 14px;
+        fill: #e2e8f0;
+      }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="820" height="280" rx="14" />
+  <rect class="glow" x="20" y="20" width="780" height="240" rx="10" />
+
+  <g xml:space="preserve" text-anchor="start">
+    <text class="line" x="40" y="50">╭─v0.1.0───────────────────────────────────────────────────╮</text>
+    <text class="line" x="40" y="72">│  ██╗    ██╗██╗██╗  ██╗██╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗  │</text>
+    <text class="line" x="40" y="94">│  ██║    ██║██║██║ ██╔╝██║██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝  │</text>
+    <text class="line" x="40" y="116">│  ██║ █╗ ██║██║█████╔╝ ██║█████╗  ██║   ██║██████╔╝██║  ███╗█████╗    │</text>
+    <text class="line" x="40" y="138">│  ██║███╗██║██║██╔═██╗ ██║██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝    │</text>
+    <text class="line" x="40" y="160">│  ╚███╔███╔╝██║██║  ╚██╗██║██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗  │</text>
+    <text class="line" x="40" y="182">│   ╚══╝╚══╝ ╚═╝╚═╝   ╚═╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝  │</text>
+    <text class="tagline" x="40" y="216">│              Scaffold an LLM Wiki, ready to run               │</text>
+    <text class="line" x="40" y="238">╰───────────────────────────────────────────────────────────────╯</text>
+  </g>
+</svg>
