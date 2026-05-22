@@ -35,31 +35,42 @@ Pressure-test claims in the {{config.project.name}} wiki through evidence-based 
   </check>
 </step>
 
-<step n="2" goal="Steelman the claim">
+<step n="2" goal="Apply lifecycle filter to wiki sources">
+  <action>Before reading pages from the wiki, exclude any page whose frontmatter has `status: superseded` or `status: archived` — those are historical record by definition, not current claims.</action>
+  <action>Proceed only with pages marked `status: current` (or pages with no `status` field set, which lint treats as `current` by default).</action>
+  <check if="this deliverable specifically requires historical context (e.g., a before/after comparison or a retrospective)">
+    <action>Include superseded pages explicitly, and annotate every claim drawn from them — in tables, italicize the row and add "(historical)"; in prose, footnote-link to the superseding page using {{config.wiki.cross_ref_style}}.</action>
+  </check>
+  <check if="any included page has `last_verified` older than {{config.maturity.decay_threshold_days}} days">
+    <action>Annotate that claim with a "verification age" marker in the output (e.g., "last verified {N} days ago") so the reader can judge freshness without leaving the document.</action>
+  </check>
+</step>
+
+<step n="3" goal="Steelman the claim">
   <action>Present the STRONGEST version of the argument in favor of the claim</action>
   <action>Gather all supporting evidence from wiki pages using {{config.wiki.cross_ref_style}} citations</action>
   <action>Note which sources back the claim and their credibility</action>
 </step>
 
-<step n="3" goal="Search for counter-evidence">
+<step n="4" goal="Search for counter-evidence">
   <action>Search the wiki for information that contradicts or weakens the claim</action>
   <action>Look for: conflicting data from other sources, unstated assumptions, methodological limitations, alternative interpretations</action>
   <action>Note gaps in evidence — what SHOULD exist to support this claim but doesn't</action>
 </step>
 
-<step n="4" goal="Evaluate evidence quality">
+<step n="5" goal="Evaluate evidence quality">
   <action>Assess the strength of evidence on both sides</action>
   <action>Distinguish between factual disputes (data conflicts) and interpretive disputes (framing differences)</action>
   <action>Assign a confidence level: High (strong evidence, no serious counter-arguments), Medium (decent evidence, some gaps), Low (weak evidence, significant counter-arguments), Contested (strong evidence on both sides)</action>
 </step>
 
-<step n="5" goal="Present adversarial analysis">
+<step n="6" goal="Present adversarial analysis">
   <action>Present the full analysis: steelman, counter-evidence, evidence quality assessment, confidence level</action>
   <action>Be fair — acknowledge when a claim survives scrutiny</action>
   <action>Suggest what additional evidence or sources could resolve the dispute</action>
 </step>
 
-<step n="6" goal="Update wiki pages">
+<step n="7" goal="Update wiki pages">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
   <action>Automatically update the confidence level on the reviewed claim's page — do not wait for user approval</action>
   <action>Add a "Review Notes" section documenting the adversarial analysis</action>

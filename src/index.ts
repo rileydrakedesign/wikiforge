@@ -4,12 +4,14 @@ import { Command } from "commander";
 import * as p from "@clack/prompts";
 import chalk from "chalk";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { writeFile } from "node:fs/promises";
 
 import { runQuestionnaire } from "./cli/questionnaire.js";
 import { runQuickStart } from "./cli/quick-start.js";
 import { loadConfigFromFile } from "./cli/from-config.js";
+import { AVAILABLE_PRESETS } from "./config/presets.js";
 import { showBanner, showWelcome, showComplete, handleCancel } from "./cli/ui.js";
 import { createDirectoryStructure } from "./generator/scaffold.js";
 import { generateSchema } from "./generator/schema.js";
@@ -30,6 +32,29 @@ import { initGitRepo, initialCommit } from "./utils/git.js";
 import type { WikiForgeConfig } from "./config/schema.js";
 
 const VERSION = "0.1.0";
+
+const PACKAGE_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
+
+function resolvePreset(name: string): string {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const match = AVAILABLE_PRESETS.find(
+    (preset) =>
+      preset.filename.replace(/\.yaml$/, "") === slug ||
+      preset.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === slug,
+  );
+  if (!match) {
+    const available = AVAILABLE_PRESETS.map((preset) =>
+      preset.filename.replace(/\.yaml$/, ""),
+    ).join(", ");
+    throw new Error(
+      `Unknown preset "${name}". Available presets: ${available}`,
+    );
+  }
+  return path.join(PACKAGE_ROOT, "presets", match.filename);
+}
 
 async function generate(
   config: WikiForgeConfig,
@@ -162,6 +187,18 @@ program
 
     if (opts.config) {
       config = await loadConfigFromFile(opts.config);
+    } else if (opts.preset) {
+      let presetPath: string;
+      try {
+        presetPath = resolvePreset(opts.preset);
+      } catch (err) {
+        p.cancel(err instanceof Error ? err.message : String(err));
+        process.exit(1);
+      }
+      config = await loadConfigFromFile(presetPath);
+      if (!config.project.created) {
+        config.project.created = new Date().toISOString().split("T")[0];
+      }
     } else {
       const mode = await p.select({
         message: "Select setup mode:",

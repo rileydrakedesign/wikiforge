@@ -18,26 +18,37 @@ Render a structured report from the {{config.project.name}} wiki as a standalone
   </check>
 </step>
 
-<step n="2" goal="Gather and organize content">
+<step n="2" goal="Apply lifecycle filter to wiki sources">
+  <action>Before reading pages from the wiki, exclude any page whose frontmatter has `status: superseded` or `status: archived` — those are historical record by definition, not current claims.</action>
+  <action>Proceed only with pages marked `status: current` (or pages with no `status` field set, which lint treats as `current` by default).</action>
+  <check if="this deliverable specifically requires historical context (e.g., a before/after comparison or a retrospective)">
+    <action>Include superseded pages explicitly, and annotate every claim drawn from them — in tables, italicize the row and add "(historical)"; in prose, footnote-link to the superseding page using {{config.wiki.cross_ref_style}}.</action>
+  </check>
+  <check if="any included page has `last_verified` older than {{config.maturity.decay_threshold_days}} days">
+    <action>Annotate that claim with a "verification age" marker in the output (e.g., "last verified {N} days ago") so the reader can judge freshness without leaving the document.</action>
+  </check>
+</step>
+
+<step n="3" goal="Gather and organize content">
   <action>Identify all relevant wiki pages within the specified scope</action>
   <action>Read each page, extracting content organized by the report sections</action>
   <action>Track confidence levels and source backing for each claim</action>
 </step>
 
-<step n="3" goal="Write report">
+<step n="4" goal="Write report">
   <action>Write the full report following the approved section structure</action>
   <action>Adapt tone and depth to the target audience</action>
   <action>Include inline citations using {{config.wiki.citation_format}} format</action>
   <action>Note any disputed or low-confidence claims transparently</action>
 </step>
 
-<step n="4" goal="Add references and appendices">
+<step n="5" goal="Add references and appendices">
   <action>Add a complete references section listing all wiki sources used</action>
   <action>Include an appendix with methodology notes (which wiki pages were consulted, when the wiki was last updated)</action>
   <action>Note any knowledge gaps that limited the report</action>
 </step>
 
-<step n="5" goal="Save and report">
+<step n="6" goal="Save and report">
   <action>Save to `outputs/reports/{topic-slug}.md`</action>
   <action>Log the export in `wiki/log.md`</action>
   <action>Report: sections written, wiki pages referenced, gaps identified</action>

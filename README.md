@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/wikiforge-logo.svg" alt="WikiForge" width="780">
+  <img src="https://raw.githubusercontent.com/rileydrakedesign/wikiforge/main/assets/wikiforge-logo.svg" alt="WikiForge" width="780">
 </p>
 
 <p align="center">
@@ -260,12 +260,22 @@ CI runs lint + build + test on Node 18/20/22 for every push and PR.
 
 ## Project status
 
-Pre-release alpha. The CLI is feature-complete and tested; not yet published to npm. Until then, install from source:
+Early release. The CLI is feature-complete and tested. Install with npm:
+
+```bash
+# one-shot, no install
+npx wikiforge init
+
+# or install globally for repeated use
+npm install -g wikiforge
+wforge init
+```
+
+To work on WikiForge itself, clone and build from source:
 
 ```bash
 git clone https://github.com/rileydrakedesign/wikiforge.git
 cd wikiforge && npm install && npm run build && npm link
-# now `wforge` is on your PATH
 ```
 
 ## Requirements

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp, rm, stat } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -170,4 +170,142 @@ describe("Scaffold smoke test", () => {
       }
     });
   }
+});
+
+describe("Cohesion invariants (REMAINING-WORK.md gaps 1-5)", () => {
+  // Single shared scaffold: every agent enabled, autonomous style, marp output,
+  // so every lifecycle-aware workflow gets rendered and can be asserted on.
+  const cfg: WikiForgeConfig = {
+    ...DEFAULT_CONFIG,
+    project: {
+      ...DEFAULT_CONFIG.project,
+      name: "cohesion-fixture",
+      created: "2026-05-21",
+    },
+    knowledge: {
+      ...DEFAULT_CONFIG.knowledge,
+      source_types: ["articles", "documents", "media"],
+    },
+    agents: {
+      ...DEFAULT_CONFIG.agents,
+      enabled: [
+        "ingestion",
+        "query",
+        "lint",
+        "research",
+        "debate",
+        "synthesis",
+        "librarian",
+        "analysis",
+      ],
+    },
+    workflows: {
+      ...DEFAULT_CONFIG.workflows,
+      ingestion_style: "autonomous",
+      outputs: ["markdown", "marp", "pdf"],
+    },
+  };
+
+  let rootDir: string;
+  let workRoot: string;
+
+  beforeAll(async () => {
+    workRoot = await mkdtemp(path.join(tmpdir(), "wforge-cohesion-"));
+    rootDir = path.join(workRoot, "fixture");
+    await scaffoldTo(rootDir, cfg);
+  });
+
+  afterAll(async () => {
+    if (workRoot) {
+      await rm(workRoot, { recursive: true, force: true });
+    }
+  });
+
+  // Gap 1: ingest workflow must not emit stale frontmatter that lint will
+  // then auto-normalize on every cycle.
+  it("ingest-source workflow does not emit `status: processed` or `confidence: high`", async () => {
+    const workflow = await readFile(
+      path.join(
+        rootDir,
+        ".forge/skills/1-acquisition/wforge-ingest-source/workflow.md",
+      ),
+      "utf-8",
+    );
+    expect(workflow).not.toContain("status: processed");
+    expect(workflow).not.toContain("confidence: high");
+  });
+
+  // Gap 2: every analysis/synthesis workflow must filter superseded/archived
+  // pages so downstream deliverables don't silently include them.
+  const lifecycleFilteredWorkflows: Array<{ phase: string; slug: string }> = [
+    { phase: "3-analysis", slug: "wforge-generate-comparison" },
+    { phase: "3-analysis", slug: "wforge-adversarial-review" },
+    { phase: "4-synthesis", slug: "wforge-compile-output" },
+    { phase: "4-synthesis", slug: "wforge-export-report" },
+    { phase: "4-synthesis", slug: "wforge-generate-slides" },
+  ];
+
+  for (const { phase, slug } of lifecycleFilteredWorkflows) {
+    it(`${slug} workflow applies the lifecycle filter`, async () => {
+      const workflow = await readFile(
+        path.join(rootDir, ".forge/skills", phase, slug, "workflow.md"),
+        "utf-8",
+      );
+      expect(workflow).toContain("Apply lifecycle filter to wiki sources");
+      expect(workflow).toContain("status: superseded");
+      expect(workflow).toContain("status: archived");
+    });
+  }
+
+  // Gap 3: persona text must not contradict the agent's own principles.
+  it("lint SKILL.md persona acknowledges the auto-fix posture", async () => {
+    const skillMd = await readFile(
+      path.join(rootDir, ".forge/agents/wforge-agent-lint/SKILL.md"),
+      "utf-8",
+    );
+    expect(skillMd.toLowerCase()).toContain("audit");
+    // accept "auto-fix", "auto-fixes", or "fixes" as evidence of posture
+    expect(skillMd).toMatch(/auto-?fix|fixes/i);
+  });
+
+  it("research SKILL.md persona uses 'provenance', not 'credibility'", async () => {
+    const skillMd = await readFile(
+      path.join(rootDir, ".forge/agents/wforge-agent-research/SKILL.md"),
+      "utf-8",
+    );
+    expect(skillMd).toContain("provenance");
+    // The persona one-liner is what changed; the agent's principles already
+    // use "provenance" consistently, so the whole SKILL.md should be clean.
+    expect(skillMd).not.toContain("credibility");
+  });
+
+  // Gap 5: autonomous web-research chain must reach the lifecycle skills.
+  it("web-research autonomous chain extends to decay-and-verify and deduplicate", async () => {
+    const workflow = await readFile(
+      path.join(
+        rootDir,
+        ".forge/skills/1-acquisition/wforge-web-research/workflow.md",
+      ),
+      "utf-8",
+    );
+    expect(workflow).toContain("wforge-decay-and-verify");
+    expect(workflow).toContain("wforge-deduplicate");
+    expect(workflow).toContain("(decay-and-verify if aged)");
+    expect(workflow).toContain("(deduplicate if needed)");
+  });
+
+  // Step 0: the new config knob must reach the rendered config.yaml.
+  it("rendered .forge/config.yaml exposes decay_threshold_days under maturity", async () => {
+    const yaml = await readFile(
+      path.join(rootDir, ".forge/config.yaml"),
+      "utf-8",
+    );
+    expect(yaml).toMatch(/decay_threshold_days:\s*\d+/);
+  });
+
+  // Step 6: schema doc must list the full lifecycle status vocab including stub.
+  it("CLAUDE.md lifecycle status vocab includes 'stub'", async () => {
+    const claudeMd = await readFile(path.join(rootDir, "CLAUDE.md"), "utf-8");
+    expect(claudeMd).toMatch(/`current`.*`superseded`.*`archived`.*`stub`/s);
+  });
 });

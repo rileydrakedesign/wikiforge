@@ -18,14 +18,25 @@ Render content from the {{config.project.name}} wiki into a polished deliverable
   </check>
 </step>
 
-<step n="2" goal="Gather source material from wiki">
+<step n="2" goal="Apply lifecycle filter to wiki sources">
+  <action>Before reading pages from the wiki, exclude any page whose frontmatter has `status: superseded` or `status: archived` — those are historical record by definition, not current claims.</action>
+  <action>Proceed only with pages marked `status: current` (or pages with no `status` field set, which lint treats as `current` by default).</action>
+  <check if="this deliverable specifically requires historical context (e.g., a before/after comparison or a retrospective)">
+    <action>Include superseded pages explicitly, and annotate every claim drawn from them — in tables, italicize the row and add "(historical)"; in prose, footnote-link to the superseding page using {{config.wiki.cross_ref_style}}.</action>
+  </check>
+  <check if="any included page has `last_verified` older than {{config.maturity.decay_threshold_days}} days">
+    <action>Annotate that claim with a "verification age" marker in the output (e.g., "last verified {N} days ago") so the reader can judge freshness without leaving the document.</action>
+  </check>
+</step>
+
+<step n="3" goal="Gather source material from wiki">
   <action>Based on the specified scope, identify all relevant wiki pages</action>
   <action>Read each page and extract content relevant to the deliverable</action>
   <action>Note the confidence level of each piece of information</action>
   <action>Track which wiki pages contribute to the output</action>
 </step>
 
-<step n="3" goal="Create outline">
+<step n="4" goal="Create outline">
   <action>Draft a structured outline appropriate to the output format</action>
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
   <action>Proceed with the draft outline — log it with `[AUTO] compile-outline | proceeding with {section count} sections`</action>
@@ -35,20 +46,20 @@ Render content from the {{config.project.name}} wiki into a polished deliverable
 {{/if}}
 </step>
 
-<step n="4" goal="Compile content">
+<step n="5" goal="Compile content">
   <action>Write the full deliverable following the approved outline</action>
   <action>Match tone and depth to the requested format and audience</action>
   <action>Cite wiki pages using {{config.wiki.cross_ref_style}} references for every factual claim</action>
   <action>Note contradictions or low-confidence claims rather than hiding them</action>
 </step>
 
-<step n="5" goal="Add references and metadata">
+<step n="6" goal="Add references and metadata">
   <action>Add a references section listing all wiki pages used</action>
   <action>Include metadata: generation date, wiki version (latest log entry), scope covered</action>
   <action>Note any knowledge gaps that limited the output</action>
 </step>
 
-<step n="6" goal="Save and report">
+<step n="7" goal="Save and report">
   <action>Save the deliverable to `outputs/exports/{slug}.md`</action>
   <action>Log the compilation in `wiki/log.md`</action>
   <action>Present a summary of what was compiled and any limitations</action>

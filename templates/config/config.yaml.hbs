@@ -23,10 +23,6 @@ log_file: "wiki/log.md"
 index_file: "wiki/index.md"
 overview_file: "wiki/overview.md"
 
-# Lifecycle thresholds — used by decay-and-verify and lint to decide when
-# claims are aging. These default by scale and can be overridden here.
-decay_threshold_days: {{#if (eq config.knowledge.scale "small")}}180{{else if (eq config.knowledge.scale "medium")}}90{{else}}60{{/if}}
-
 # Lint posture — auto-fix safe categories by default; users override with
 # `--report-only` when invoking the skill, or by setting this to false.
 lint_autofix: true
@@ -38,3 +34,7 @@ maturity:
   research_sources_min: {{config.maturity.research_sources_min}}
   review_pages_min: {{config.maturity.review_pages_min}}
   synthesis_pages_min: {{config.maturity.synthesis_pages_min}}
+  # Days since `last_verified` after which a page is a decay candidate.
+  # The autonomous cycle gates `decay-and-verify` on this; analysis and
+  # synthesis workflows annotate pages older than this as aging.
+  decay_threshold_days: {{config.maturity.decay_threshold_days}}

@@ -33,6 +33,15 @@
     "agent"
   ],
   "license": "MIT",
+  "author": "Riley Drake <rileydrakedesign@gmail.com> (https://github.com/rileydrakedesign)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rileydrakedesign/wikiforge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rileydrakedesign/wikiforge/issues"
+  },
+  "homepage": "https://github.com/rileydrakedesign/wikiforge#readme",
   "engines": {
     "node": ">=18.0.0"
   },

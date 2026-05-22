@@ -32,5 +32,6 @@ export const DEFAULT_CONFIG: WikiForgeConfig = {
     research_sources_min: 3,
     review_pages_min: 5,
     synthesis_pages_min: 3,
+    decay_threshold_days: 90,
   },
 };

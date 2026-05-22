@@ -17,7 +17,18 @@ Build a structured comparison between entities or concepts in the {{config.proje
   </check>
 </step>
 
-<step n="2" goal="Determine comparison dimensions">
+<step n="2" goal="Apply lifecycle filter to wiki sources">
+  <action>Before reading pages from the wiki, exclude any page whose frontmatter has `status: superseded` or `status: archived` — those are historical record by definition, not current claims.</action>
+  <action>Proceed only with pages marked `status: current` (or pages with no `status` field set, which lint treats as `current` by default).</action>
+  <check if="this deliverable specifically requires historical context (e.g., a before/after comparison or a retrospective)">
+    <action>Include superseded pages explicitly, and annotate every claim drawn from them — in tables, italicize the row and add "(historical)"; in prose, footnote-link to the superseding page using {{config.wiki.cross_ref_style}}.</action>
+  </check>
+  <check if="any included page has `last_verified` older than {{config.maturity.decay_threshold_days}} days">
+    <action>Annotate that claim with a "verification age" marker in the output (e.g., "last verified {N} days ago") so the reader can judge freshness without leaving the document.</action>
+  </check>
+</step>
+
+<step n="3" goal="Determine comparison dimensions">
   <action>Based on the subjects and domain, identify the most meaningful comparison attributes</action>
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
   <action>Proceed with the identified dimensions — log the choice with `[AUTO] comparison-dimensions | selected: {dimensions list}`</action>
@@ -27,19 +38,19 @@ Build a structured comparison between entities or concepts in the {{config.proje
   <action>Read all relevant wiki pages to gather data for each dimension</action>
 </step>
 
-<step n="3" goal="Build comparison table">
+<step n="4" goal="Build comparison table">
   <action>Create a markdown table with subjects as columns and attributes as rows</action>
   <action>Fill in data from wiki pages, citing sources for each cell</action>
   <action>Mark cells where data is missing or uncertain</action>
 </step>
 
-<step n="4" goal="Write analysis">
+<step n="5" goal="Write analysis">
   <action>Below the table, write a narrative analysis of key differences and similarities</action>
   <action>Highlight surprising findings or important distinctions</action>
   <action>Note where data gaps limit the comparison</action>
 </step>
 
-<step n="5" goal="Save and index">
+<step n="6" goal="Save and index">
   <action>Save to `wiki/comparisons/{subject-a}-vs-{subject-b}.md` using the comparison-table template</action>
 {{#if config.wiki.frontmatter}}
   <action>Include frontmatter: type: comparison, subjects list, created date, source_count</action>

@@ -65,8 +65,11 @@ Find new high-quality sources to fill knowledge gaps in the {{config.project.nam
   <action>Proceed directly to batch ingestion of the fetched sources — invoke the `wforge-batch-ingest` workflow with the new source list</action>
   <action>After batch ingestion completes, invoke `wforge-cross-reference` to verify link integrity across all new and updated pages</action>
   <action>Then invoke `wforge-reindex` to rebuild the wiki index</action>
-  <action>Finally, run a lightweight lint pass via `wforge-lint-wiki` to identify any issues introduced during this cycle</action>
-  <critical>This is ONE autonomous cycle: research → fetch → ingest → cross-reference → reindex → lint → report. Do NOT loop back to gap identification. After the lint report, STOP and present a consolidated cycle summary to the user.</critical>
+  <action>Run a lightweight lint pass via `wforge-lint-wiki` to identify any issues introduced during this cycle</action>
+  <action>After the lint pass, check `wiki/log.md` for the most recent `decay-and-verify` operation entry. If none exists, OR if the most recent one is older than `{{config.maturity.decay_threshold_days}} * 1.5` days, invoke `wforge-decay-and-verify` next to re-verify aging pages. Otherwise skip this step.</action>
+  <action>If the lint report flagged duplicate sources or near-duplicate pages, invoke `wforge-deduplicate` next to consolidate. Otherwise skip.</action>
+  <action>Finally, produce the consolidated cycle report.</action>
+  <critical>This is ONE autonomous cycle: research → fetch → ingest → cross-reference → reindex → lint → (decay-and-verify if aged) → (deduplicate if needed) → report. Do NOT loop back to gap identification. After the cycle report, STOP and present a consolidated cycle summary to the user.</critical>
 {{else}}
   <action>Ask the user which recommended sources to ingest</action>
   <action>For approved sources, either queue them for batch ingestion or begin single-source ingestion</action>

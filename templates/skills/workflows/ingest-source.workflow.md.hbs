@@ -33,7 +33,7 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
 {{#if (includes config.knowledge.source_types "articles")}}
   <check if="source is a URL or web page">
     <action>Fetch the content and convert to clean markdown. Strip navigation, ads, boilerplate</action>
-    <action>Download images to `raw/assets/` and rewrite image refs to local paths — URLs break over time, local copies don't</action>
+    <action>Run `.forge/tools/download-assets.sh raw/articles/{slug}.md` to download remote images to `raw/assets/` and rewrite refs to local paths. The tool dedupes by URL hash, so re-invocation on the same source is safe and idempotent — URLs break over time, local copies don't.</action>
     <action>Save to `raw/articles/{slug}.md`</action>
   </check>
 {{/if}}
@@ -68,11 +68,8 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
 <step n="3" goal="Ensure YAML frontmatter is present">
 {{#if config.wiki.frontmatter}}
   <action>Verify or add YAML frontmatter to the source file:</action>
-  <action>Required fields: title, source_type, original_path, content_hash (SHA-256, first 16 chars), ingested_at (ISO timestamp), status: processed, tags: []</action>
+  <action>Required fields: title, source_type, original_path, content_hash (SHA-256, first 16 chars), ingested_at (ISO timestamp), tags: []</action>
   <action>The content_hash enables staleness detection — if a source is updated and re-ingested, the hash mismatch signals that wiki pages derived from it may need recompilation</action>
-  <check if="frontmatter exists with status: raw">
-    <action>Update status to `processed`</action>
-  </check>
 {{else}}
   <action>Frontmatter is disabled for this project. Ensure the filename is descriptive and skip this step</action>
 {{/if}}
@@ -117,7 +114,7 @@ The wiki is NOT RAG. You are not chunking documents for retrieval. You are **com
 <step n="5" goal="Create source summary page">
   <action>Create `wiki/sources/{slug}.md` using the source-summary template from `.forge/templates/`</action>
 {{#if config.wiki.frontmatter}}
-  <action>Include frontmatter: title, type: source, original path, date_added, last_updated, confidence: high, entities list, concepts list, content_hash</action>
+  <action>Include frontmatter: title, type: source, original path, date_added, last_updated, entities list, concepts list, content_hash</action>
 {{/if}}
   <action>Write a concise summary (3-8 paragraphs) covering the source's main arguments and contributions</action>
   <action>List key takeaways as a numbered list</action>

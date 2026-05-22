@@ -104,6 +104,12 @@ export interface MaturityConfig {
   review_pages_min: number;
   /** Min wiki pages contributing to a query before Quinn auto-files synthesis. */
   synthesis_pages_min: number;
+  /**
+   * Days since `last_verified` after which a page is a decay candidate. Drives
+   * the autonomous cycle's gate on `decay-and-verify` and the freshness
+   * annotation in analysis/synthesis workflows.
+   */
+  decay_threshold_days: number;
 }
 
 export interface WikiForgeConfig {

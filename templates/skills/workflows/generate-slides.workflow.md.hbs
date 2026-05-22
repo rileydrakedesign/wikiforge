@@ -18,13 +18,24 @@ Render content from the {{config.project.name}} wiki into a Marp-formatted slide
   </check>
 </step>
 
-<step n="2" goal="Gather content from wiki">
+<step n="2" goal="Apply lifecycle filter to wiki sources">
+  <action>Before reading pages from the wiki, exclude any page whose frontmatter has `status: superseded` or `status: archived` — those are historical record by definition, not current claims.</action>
+  <action>Proceed only with pages marked `status: current` (or pages with no `status` field set, which lint treats as `current` by default).</action>
+  <check if="this deliverable specifically requires historical context (e.g., a before/after comparison or a retrospective)">
+    <action>Include superseded pages explicitly, and annotate every claim drawn from them — in tables, italicize the row and add "(historical)"; in prose, footnote-link to the superseding page using {{config.wiki.cross_ref_style}}.</action>
+  </check>
+  <check if="any included page has `last_verified` older than {{config.maturity.decay_threshold_days}} days">
+    <action>Annotate that claim with a "verification age" marker in the output (e.g., "last verified {N} days ago") so the reader can judge freshness without leaving the document.</action>
+  </check>
+</step>
+
+<step n="3" goal="Gather content from wiki">
   <action>Identify relevant wiki pages based on the specified scope</action>
   <action>Read each page and extract key points suitable for slides</action>
   <action>Prioritize high-confidence claims and well-sourced information</action>
 </step>
 
-<step n="3" goal="Create slide outline">
+<step n="4" goal="Create slide outline">
   <action>Draft a slide-by-slide outline: title slide, agenda, content slides, summary, references</action>
   <action>Each content slide: title, 3-5 bullet points, optional speaker notes</action>
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
@@ -34,7 +45,7 @@ Render content from the {{config.project.name}} wiki into a Marp-formatted slide
 {{/if}}
 </step>
 
-<step n="4" goal="Write Marp-formatted slides">
+<step n="5" goal="Write Marp-formatted slides">
   <action>Write the slide deck in Marp markdown format:</action>
   <action>Use `---` to separate slides</action>
   <action>Use `marp: true` in YAML frontmatter</action>
@@ -42,7 +53,7 @@ Render content from the {{config.project.name}} wiki into a Marp-formatted slide
   <action>Add speaker notes with {{config.wiki.cross_ref_style}} citations to wiki pages</action>
 </step>
 
-<step n="5" goal="Save and report">
+<step n="6" goal="Save and report">
   <action>Save to `outputs/slides/{topic-slug}.md`</action>
   <action>Log the slide generation in `wiki/log.md`</action>
   <action>Report: number of slides, wiki pages referenced, any content gaps noted</action>

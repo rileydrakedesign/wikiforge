@@ -122,8 +122,12 @@ This wiki's `ingestion_style` setting governs system-wide workflow autonomy — 
 3. **Ingest** (Iris) processes all new sources into the wiki
 4. **Cross-reference** (Leo) verifies and builds links across new and existing pages
 5. **Reindex** (Leo) rebuilds the wiki index
-6. **Lint** (Linus) health-checks the wiki and produces the cycle report
-7. **Report** — consolidated summary presented to the user
+6. **Lint** (Linus) health-checks the wiki
+7. **Decay-and-verify** (Linus, *gated*) — if no `decay-and-verify` has run within `decay_threshold_days × 1.5`, refresh aging pages whose `last_verified` is past threshold
+8. **Deduplicate** (Leo, *gated*) — if lint flagged duplicate sources or near-duplicate pages, consolidate them
+9. **Report** — consolidated summary presented to the user
+
+Steps 7 and 8 are maturity-gated: they only chain in once the wiki has accumulated enough state to need them, matching the same philosophy as the bootstrap-phase gates below.
 
 This cycle runs **once** and stops. It does not loop. The human reviews the cycle report and decides what to do next.
 
@@ -204,7 +208,7 @@ All wiki pages must have YAML frontmatter with at minimum:
 - `confidence`: `high`, `medium`, `low`, or `disputed`
 
 **Lifecycle fields** (set when relevant, omit otherwise):
-- `status`: `current` (default), `superseded`, or `archived`
+- `status`: `current` (default), `superseded`, `archived`, or `stub` (placeholder page auto-created by Linus when a cross-reference points at a page that does not yet exist)
 - `supersedes`: list of page slugs this page replaces
 - `superseded_by`: slug of the page that replaces this one (set when status is `superseded`)
 - `last_verified`: ISO date the claims on this page were last re-checked against current sources
