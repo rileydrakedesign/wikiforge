@@ -10,17 +10,21 @@ export function showBanner(): void {
   console.log();
   p.intro(chalk.bgCyan.black(" WikiForge "));
 
+  // Banner is laid out at exactly 72 columns per line so the border, the
+  // ASCII art rows, and the tagline align in any monospace renderer. If you
+  // change VERSION's length, regenerate the top-border dash count: total = 72
+  // and `╭─v{VERSION}` consumes 2 + VERSION.length chars before the dashes.
   console.log(
     chalk.cyan(`
-  ╭─v${VERSION}───────────────────────────────────────────────────╮
+  ╭─v${VERSION}───────────────────────────────────────────────────────────────╮
   │  ██╗    ██╗██╗██╗  ██╗██╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗  │
   │  ██║    ██║██║██║ ██╔╝██║██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝  │
   │  ██║ █╗ ██║██║█████╔╝ ██║█████╗  ██║   ██║██████╔╝██║  ███╗█████╗    │
   │  ██║███╗██║██║██╔═██╗ ██║██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝    │
-  │  ╚███╔███╔╝██║██║  ╚██╗██║██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗  │
-  │   ╚══╝╚══╝ ╚═╝╚═╝   ╚═╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝  │
-  │              Scaffold an LLM Wiki, ready to run               │
-  ╰───────────────────────────────────────────────────────────────╯`),
+  │  ╚███╔███╔╝██║██║  ██╗██║██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗  │
+  │   ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝  │
+  │                  Scaffold an LLM Wiki, ready to run                  │
+  ╰──────────────────────────────────────────────────────────────────────╯`),
   );
 }
 
