@@ -19,7 +19,7 @@ This is a WikiForge-managed LLM Wiki. This wiki is NOT RAG — sources are not c
 ```
 .
 ├── CLAUDE.md                       # This file — project schema
-├── wikiforge.yaml                  # Frozen config (re-generate with wforge)
+├── wikiforge.yaml                  # Boot config (re-generate with wforge; schema co-evolves via wforge-revise-schema)
 ├── wiki/
 │   ├── index.md                    # Master page index
 │   ├── log.md                      # Operation log (append-only)
@@ -70,7 +70,11 @@ This is a WikiForge-managed LLM Wiki. This wiki is NOT RAG — sources are not c
 └── .claude/skills/                 # IDE launchers (load agents/skills)
 ```
 
+> **`wiki/` is canonical. `outputs/` is a render target.** Slides, reports, and exports are *views* of the wiki, not separate documents — generated on demand from wiki content. The wiki is the deliverable; `outputs/` is what you ship to people who don't read wikis.
+
 ## Agent System
+
+> **Agents are personas, not separate runtimes.** One LLM session adopts the role of whichever agent is invoked — switching agents is switching modes (principles, checklists, capabilities), not handing off between processes. There is no inter-agent orchestration layer to worry about; the LLM simply changes hats when a launcher is run.
 
 This wiki uses specialized agents defined in `.forge/agents/`. Each agent has
 a persona, capabilities menu, and activation instructions. Activate an agent
@@ -132,9 +136,9 @@ This cycle runs **once** and stops. It does not loop. The human reviews the cycl
 
 **Maturity guards (bootstrap phase):**
 Autonomous mode is not fully autonomous from day one. When the wiki is sparse, certain operations fall back to human-guided behavior:
-- **Research (Rex)**: Requires 3+ ingested sources before autonomous gap identification. Below that, Rex asks the user what to search for.
-- **Adversarial review (Diana)**: Requires 5+ entity/concept pages before autonomous claim selection. Below that, Diana asks the user which claims to review.
-- **Query compounding (Quinn)**: Only auto-saves synthesis that drew from 3+ wiki pages. Thinner synthesis requires user confirmation.
+- **Research (Rex)**: Requires {{config.maturity.research_sources_min}}+ ingested sources before autonomous gap identification. Below that, Rex asks the user what to search for.
+- **Adversarial review (Diana)**: Requires {{config.maturity.review_pages_min}}+ entity/concept pages before autonomous claim selection. Below that, Diana asks the user which claims to review.
+- **Query compounding (Quinn)**: Only auto-saves synthesis that drew from {{config.maturity.synthesis_pages_min}}+ wiki pages. Thinner synthesis requires user confirmation.
 - **Full autonomous cycle**: Does not auto-chain from research through lint until the wiki passes the maturity threshold.
 
 As the wiki grows past these thresholds, the system becomes progressively more autonomous. The human provides direction early; the LLM takes over bookkeeping and eventually curation as the foundation solidifies.
@@ -148,6 +152,18 @@ As the wiki grows past these thresholds, the system becomes progressively more a
 
 **Audit log:** Every autonomous decision is logged in `wiki/log.md` with the prefix `[AUTO] action | reasoning`. Review this log to audit what the system did and why.
 {{/if}}
+
+### Mode override (per-invocation)
+
+The `ingestion_style` setting in `.forge/config.yaml` is a **default**, not a constraint. Any workflow may be invoked with a `--mode` flag that overrides the default for that call only:
+
+- `--mode deliberate` — stop for human approval at every decision point
+- `--mode batch` — process in batches, no stopping at each step
+- `--mode autonomous` — chain fully autonomously (subject to maturity guards)
+
+This makes supervision a **per-conversation choice**, not a global setting. Want to ingest one source carefully on an otherwise autonomous wiki? `/wforge-ingest-source --mode deliberate`. Want to batch-run lint without auto-fixing? `/wforge-lint-wiki --report-only` (the lint-specific flag) or `--mode deliberate` to also stop for confirmation on suggested fixes.
+
+When a workflow's prompt branches on `ingestion_style`, treat the override as: "if an invocation override is given, follow that branch; otherwise follow the config default."
 
 ## Wiki Lifecycle
 
@@ -170,6 +186,10 @@ These three loops are what make this a compounding wiki rather than a notes fold
 2. **Answers compound back into the wiki.** Good answers do not disappear into chat history. When a query produces a novel comparison, analysis, or connection, file it back into the wiki as a new page — comparisons into `wiki/comparisons/`, analyses and connections into `wiki/concepts/`. The `file-answer` skill does this; the query-wiki skill ends by offering it (or doing it autonomously, depending on mode).
 
 3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The prefix is intentionally regular so `grep "^## \[" wiki/log.md | tail -N` produces a clean timeline without any extra tooling.
+
+## The schema co-evolves
+
+This file is a *first guess* about how the {{config.project.name}} wiki should work. As you and the LLM accumulate sources, queries, and lint passes, real conventions emerge — new page types you keep creating, frontmatter fields that turn out to matter, agent principles you find yourself bending. When that happens, run `/wforge-revise-schema` to propose a structured update based on observed friction (the LLM scans `wiki/log.md` and the actual wiki state, then presents a diff for your approval). The schema is not frozen; it is the contract you and the LLM revise together as you learn what the domain needs.
 
 ## Wiki Conventions
 

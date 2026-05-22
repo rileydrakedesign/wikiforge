@@ -133,6 +133,7 @@ export const AGENT_META: Record<AgentType, AgentMeta> = {
       { code: "ST", description: "Generate wiki statistics", skill: "wforge-stats" },
       { code: "RC", description: "Resolve a flagged contradiction (annotate, split, supersede, or reconcile)", skill: "wforge-resolve-contradiction" },
       { code: "DV", description: "Re-verify aging claims and update confidence", skill: "wforge-decay-and-verify" },
+      { code: "RS", description: "Propose a schema revision based on observed wiki usage and friction", skill: "wforge-revise-schema" },
     ],
   },
   research: {

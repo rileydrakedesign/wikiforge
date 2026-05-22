@@ -15,6 +15,10 @@ organization: "{{config.knowledge.organization}}"
 ingestion_style: "{{config.workflows.ingestion_style}}"
 scale: "{{config.knowledge.scale}}"
 frontmatter_enabled: {{config.wiki.frontmatter}}
+source_types:
+{{#each config.knowledge.source_types}}
+  - "{{this}}"
+{{/each}}
 log_file: "wiki/log.md"
 index_file: "wiki/index.md"
 overview_file: "wiki/overview.md"
@@ -26,3 +30,11 @@ decay_threshold_days: {{#if (eq config.knowledge.scale "small")}}180{{else if (e
 # Lint posture — auto-fix safe categories by default; users override with
 # `--report-only` when invoking the skill, or by setting this to false.
 lint_autofix: true
+
+# Maturity thresholds — gate autonomous behavior on wiki state. Below
+# these counts, autonomous-mode agents fall back to asking the user for
+# direction instead of acting unsupervised.
+maturity:
+  research_sources_min: {{config.maturity.research_sources_min}}
+  review_pages_min: {{config.maturity.review_pages_min}}
+  synthesis_pages_min: {{config.maturity.synthesis_pages_min}}

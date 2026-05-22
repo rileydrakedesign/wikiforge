@@ -1,14 +1,30 @@
 # WikiForge
 
-Scaffold LLM-powered research agent repositories through an interactive terminal questionnaire.
+Scaffold an **LLM Wiki** — a compounding, agent-maintained knowledge base — through an interactive terminal questionnaire.
 
-WikiForge combines [Karpathy's LLM Wiki pattern](https://github.com/karpathy/LLM-wiki) (raw -> wiki -> schema) with BMAD Method-style structured agents and workflows. In ~60 seconds, it generates a fully working research wiki implementation — directory structure, agent personas, workflows, templates, and tooling — tailored to your domain and preferences.
+WikiForge combines [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (raw → wiki → schema) with BMAD Method-style structured agents and workflows. In ~60 seconds, it generates a fully working implementation — directory structure, agent personas, workflows, templates, and tooling — tailored to your domain and preferences.
 
 ## Why WikiForge?
 
-Instead of RAG (re-deriving knowledge per query), the LLM Wiki approach has the LLM **incrementally build and maintain a persistent wiki** — a structured, interlinked collection of markdown files compiled from raw sources. Cross-references are pre-built, contradictions are flagged, and synthesis reflects everything ingested. The human curates sources and asks questions; the LLM does the bookkeeping.
+Instead of RAG (re-deriving knowledge per query), the LLM Wiki approach has the LLM **incrementally build and maintain a persistent wiki** — a structured, interlinked collection of markdown files compiled from raw sources. Cross-references are pre-built, contradictions are flagged, synthesis reflects everything ingested. The human curates sources and asks questions; the LLM does the bookkeeping.
 
 WikiForge takes this abstract pattern and generates a concrete, ready-to-use implementation.
+
+## Lineage
+
+The LLM Wiki pattern descends from Vannevar Bush's [Memex](https://en.wikipedia.org/wiki/Memex) (1945) — a personal, curated knowledge store with associative trails between documents. Bush's vision was closer to this than to what the public web became: private, actively curated, with the connections between documents as valuable as the documents themselves. The part Bush couldn't solve was who does the maintenance. The LLM handles that now.
+
+For a sense of scale, look at [Tolkien Gateway](https://tolkiengateway.net/wiki/Main_Page) — thousands of interlinked pages built and maintained by volunteers over years. WikiForge generates the scaffold to build something with that shape personally, with one human curating and one LLM doing the cross-references.
+
+## Core Loops (LLM Wiki invariants)
+
+Three loops are what make a WikiForge-generated repo a compounding wiki rather than a notes folder. The agents enforce them; users should rarely notice them happening.
+
+1. **Index-first navigation.** Read `wiki/index.md` before searching individual pages. It is the primary navigation tool — every page is catalogued there with a one-line summary. Drill into specific pages only after the index has narrowed the candidate set.
+
+2. **Answers compound back into the wiki.** Good answers do not disappear into chat history. When a query produces a novel comparison, analysis, or connection, file it back into the wiki as a new page via the `file-answer` skill — comparisons into `wiki/comparisons/`, analyses and connections into `wiki/concepts/`.
+
+3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The prefix is intentionally regular so `grep "^## \[" wiki/log.md | tail -N` produces a clean timeline without any extra tooling.
 
 ## Quick Start
 
@@ -35,9 +51,9 @@ You'll be guided through a questionnaire to configure your project, then WikiFor
 ## What Gets Generated
 
 ```
-my-research-wiki/
+my-wiki/
 ├── CLAUDE.md                 # Schema file for your LLM tool
-├── wikiforge.yaml            # Frozen config (re-run anytime)
+├── wikiforge.yaml            # Boot config (re-run wforge anytime)
 ├── .forge/
 │   ├── agents/               # Agent personas (SKILL.md per agent)
 │   ├── skills/               # Workflows organized by lifecycle phase
@@ -94,6 +110,7 @@ Start from a pre-configured template:
 
 ```bash
 wforge init --preset academic-research
+wforge init --preset autonomous-wiki
 wforge init --preset book-companion
 wforge init --preset competitive-analysis
 wforge init --preset personal-knowledge

@@ -28,4 +28,9 @@ export const DEFAULT_CONFIG: WikiForgeConfig = {
     citation_format: "inline",
     cross_ref_style: "wikilink",
   },
+  maturity: {
+    research_sources_min: 3,
+    review_pages_min: 5,
+    synthesis_pages_min: 3,
+  },
 };

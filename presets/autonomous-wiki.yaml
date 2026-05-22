@@ -1,15 +1,16 @@
 version: 1
 project:
-  name: "academic-research"
+  name: "autonomous-wiki"
   domain: ""
-  description: "Academic research knowledge base with paper-focused ingestion"
+  description: "Autonomous LLM Wiki — agents chain automatically to discover, ingest, cross-reference, and maintain the wiki with minimal supervision"
   created: ""
 
 knowledge:
   source_types:
     - documents
     - articles
-  organization: thesis-driven
+    - data
+  organization: entity-first
   scale: medium
 
 agents:
@@ -21,20 +22,20 @@ agents:
     - research
     - debate
     - librarian
+    - analysis
   party_mode: false
 
 workflows:
-  ingestion_style: deliberate
+  ingestion_style: autonomous
   outputs:
     - markdown
-    - obsidian
   tools:
     - search
     - stats
 
 wiki:
   frontmatter: true
-  citation_format: academic
+  citation_format: inline
   cross_ref_style: wikilink
 
 maturity:

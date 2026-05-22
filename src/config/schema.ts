@@ -92,6 +92,20 @@ export interface WikiConfig {
   cross_ref_style: CrossRefStyle;
 }
 
+/**
+ * Wiki-state maturity thresholds. These tune when autonomous-mode agents
+ * are allowed to act without confirmation. They are wiki properties (a function
+ * of how much knowledge has accumulated), not workflow knobs.
+ */
+export interface MaturityConfig {
+  /** Min ingested sources before Rex may autonomously identify gaps and fetch. */
+  research_sources_min: number;
+  /** Min entity/concept pages before Diana may autonomously review claims. */
+  review_pages_min: number;
+  /** Min wiki pages contributing to a query before Quinn auto-files synthesis. */
+  synthesis_pages_min: number;
+}
+
 export interface WikiForgeConfig {
   version: 1;
   project: ProjectConfig;
@@ -99,4 +113,5 @@ export interface WikiForgeConfig {
   agents: AgentsConfig;
   workflows: WorkflowsConfig;
   wiki: WikiConfig;
+  maturity: MaturityConfig;
 }

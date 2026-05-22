@@ -13,14 +13,14 @@ Find new high-quality sources to fill knowledge gaps in the {{config.project.nam
 <step n="0" goal="Assess wiki maturity before autonomous research">
   <action>Count the number of source summary pages in `wiki/sources/`</action>
   <action>Count the number of entity and concept pages in `wiki/entities/` and `wiki/concepts/`</action>
-  <check if="wiki has fewer than 3 ingested sources">
-    <critical>The wiki is too sparse for autonomous research. With fewer than 3 sources, there is not enough context to identify meaningful knowledge gaps — searching now would be unfocused and produce low-quality results.</critical>
+  <check if="wiki has fewer than {{config.maturity.research_sources_min}} ingested sources">
+    <critical>The wiki is too sparse for autonomous research. With fewer than {{config.maturity.research_sources_min}} sources, there is not enough context to identify meaningful knowledge gaps — searching now would be unfocused and produce low-quality results.</critical>
     <action>FALL BACK to human-guided mode for this operation: ask the user what topics, questions, or areas they want you to research. Use their direction instead of gap analysis.</action>
     <action>Present: "Your wiki has [N] sources — not enough for me to autonomously identify gaps. What would you like me to search for? Give me a topic, question, or area of {{config.project.domain}} to focus on."</action>
     <action>WAIT for user input. Use their response as the research focus for the remaining steps.</action>
     <action>After this research session completes, do NOT auto-chain the full autonomous cycle. Present recommendations to the user as in deliberate mode — the wiki needs more human-curated foundation before autonomous cycles are productive.</action>
   </check>
-  <check if="wiki has 3+ sources but no entity or concept pages (sources ingested but not compiled)">
+  <check if="wiki has {{config.maturity.research_sources_min}}+ sources but no entity or concept pages (sources ingested but not compiled)">
     <action>Warn: "Your wiki has sources but they haven't been compiled into entity/concept pages yet. Research will be more effective after running update-entities and update-concepts. Proceeding with gap analysis based on source summaries only."</action>
   </check>
 </step>

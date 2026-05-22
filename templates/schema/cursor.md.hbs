@@ -23,6 +23,10 @@ agents in `.forge/agents/`, skills in `.forge/skills/`.
 - `.forge/_config/` — Manifests (skill, agent, file catalogs)
 - `.cursor/skills/` — IDE launchers
 
+> `outputs/` is a render target — deliverables are views rendered from wiki content. The wiki is canonical.
+
+> Agents are personas, not separate runtimes. One LLM session adopts whichever agent role the user invokes.
+
 ## Available Agents
 
 {{#each config.agents.enabled}}
@@ -39,11 +43,19 @@ agents in `.forge/agents/`, skills in `.forge/skills/`.
 4. **Synthesis**: compile-output, generate-slides, export-report, periodic-digest
 5. **Maintenance**: lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify
 
+## Mode Override
+
+Workflows accept `--mode deliberate|batch|autonomous` at invocation time, overriding the config default. Treat the flag as authoritative.
+
 ## Core Loops
 
 - **Index-first**: read `wiki/index.md` before searching pages — it is the primary navigation tool.
 - **Answers compound**: novel synthesis from query-wiki is filed back into the wiki via `file-answer` (comparisons → `wiki/comparisons/`, analyses → `wiki/concepts/`).
 - **Parseable log**: every operation appends to `wiki/log.md` with `## [ISO-timestamp] operation | title`.
+
+## Schema co-evolves
+
+Run `wforge-revise-schema` to propose schema updates based on observed friction. Diff presented for human approval.
 
 ## Conventions
 

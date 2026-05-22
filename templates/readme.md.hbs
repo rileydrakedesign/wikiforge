@@ -78,6 +78,64 @@
 | 4. Synthesis | compile-output, generate-slides, export-report, periodic-digest | Create deliverables and recurring summaries |
 | Maintenance | lint-wiki, reindex, stats, resolve-contradiction, supersede-claim, deduplicate, decay-and-verify | Keep wiki healthy, current, and internally consistent |
 
+## Workflow Mode
+
+{{#if (eq config.workflows.ingestion_style "deliberate")}}
+**Deliberate** — Every operation stops for your approval. You curate sources and guide emphasis; the LLM does the bookkeeping. Best for careful, high-stakes research.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "batch")}}
+**Batch** — Operations process in batches without stopping at each step. Review the cumulative result after a batch completes. Best for processing many sources efficiently.
+{{/if}}
+{{#if (eq config.workflows.ingestion_style "autonomous")}}
+**Autonomous** — Agents chain automatically into a full research cycle:
+
+```
+Rex (research) → Iris (ingest) → Leo (cross-ref + reindex) → Linus (lint) → Cycle Report
+```
+
+Queries auto-save novel synthesis. Contradictions are auto-flagged. All autonomous decisions are logged with `[AUTO]` prefix in `wiki/log.md`.
+
+**Bootstrap phase**: The system needs a foundation before going fully autonomous:
+- **{{config.maturity.research_sources_min}}+ sources** → Rex can autonomously find and ingest new sources
+- **{{config.maturity.review_pages_min}}+ entity/concept pages** → Diana can autonomously review claims
+- **{{config.maturity.synthesis_pages_min}}+ pages in a query** → Quinn auto-saves synthesis
+
+Below these thresholds, the system falls back to asking you for direction.
+{{/if}}
+
+{{#if (includes config.workflows.outputs "obsidian")}}
+## Use with Obsidian
+
+This vault ships with `.obsidian/` pre-configured for the LLM Wiki workflow:
+
+1. **Open the project root as a vault in Obsidian** — `File → Open vault → Open folder as vault`.
+2. **Run the LLM agent alongside Obsidian** — keep the agent open on one side, Obsidian on the other. As the agent edits wiki pages, watch them update live; follow `[[wikilinks]]` to browse.
+3. **Graph view** — open with `Cmd/Ctrl + G`. Nodes are color-coded by wiki subdirectory (entities, concepts, sources, comparisons). The shape of the graph is the shape of your knowledge.
+4. **Attachment hotkey** — in `Settings → Hotkeys`, search for "Download attachments for current file" and bind to `Cmd/Ctrl + Shift + D`. Useful after web-clipping — pulls remote images into `raw/assets/` so the LLM can reference them locally instead of via URLs that may break.
+5. **Recommended community plugins** — Dataview (queries over frontmatter), Marp (slide decks from markdown). Install via `Settings → Community plugins`.
+{{#if config.wiki.frontmatter}}
+
+With frontmatter enabled, Dataview can produce live tables over wiki pages, e.g.:
+
+````dataview
+TABLE source_count, confidence, last_updated
+FROM "wiki/entities"
+SORT source_count DESC
+````
+
+{{/if}}
+{{/if}}
+
+## Core Loops (LLM Wiki invariants)
+
+Three loops make this a compounding wiki rather than a notes folder. The agents enforce them; you should rarely notice them happening.
+
+1. **Index-first navigation.** Read `wiki/index.md` before searching individual pages. It is the primary navigation tool — every page is catalogued there with a one-line summary. Drill into specific pages only after the index has narrowed the candidate set.
+
+2. **Answers compound back into the wiki.** Good answers do not disappear into chat history. When a query produces a novel comparison, analysis, or connection, it is filed back into the wiki as a new page via the `file-answer` skill — comparisons into `wiki/comparisons/`, analyses and connections into `wiki/concepts/`.
+
+3. **Operations log in parseable form.** Every ingest, query, lint, and maintenance action appends to `wiki/log.md` with the prefix `## [ISO-timestamp] operation | title`. The prefix is intentionally regular so `grep "^## \[" wiki/log.md | tail -N` produces a clean timeline without any extra tooling.
+
 ## Wiki Conventions
 
 | Setting | Value |

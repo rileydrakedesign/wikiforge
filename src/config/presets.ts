@@ -31,4 +31,10 @@ export const AVAILABLE_PRESETS: Preset[] = [
       "General-purpose wiki with articles, Obsidian-optimized output",
     filename: "personal-knowledge.yaml",
   },
+  {
+    name: "Autonomous Wiki",
+    description:
+      "Autonomous mode — agents chain automatically to discover, ingest, cross-reference, and maintain the wiki",
+    filename: "autonomous-wiki.yaml",
+  },
 ];

@@ -205,6 +205,14 @@ const SKILLS: SkillDef[] = [
     workflowTemplate: "skills/workflows/decay-and-verify.workflow.md.hbs",
     condition: (c) => c.agents.enabled.includes("lint"),
   },
+  {
+    slug: "wforge-revise-schema",
+    name: "Revise Schema",
+    description: "Propose a schema (CLAUDE.md/AGENTS.md/.cursorrules) revision based on observed wiki usage and friction",
+    phase: "maintenance",
+    workflowTemplate: "skills/workflows/revise-schema.workflow.md.hbs",
+    condition: (c) => c.agents.enabled.includes("lint"),
+  },
 ];
 
 /**

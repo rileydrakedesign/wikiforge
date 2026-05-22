@@ -5,7 +5,9 @@ config: '{project-root}/.forge/config.yaml'
 # Compile Output
 
 ## Goal
-Compile content from the {{config.project.name}} wiki into a polished deliverable document.
+Render content from the {{config.project.name}} wiki into a polished deliverable document.
+
+**The wiki is canonical; this skill produces a view.** Read from `wiki/`, write to `outputs/`. Never modify wiki pages here — if a synthesis emerges that is worth keeping permanently, route it through `wforge-file-answer` instead.
 
 <workflow>
 

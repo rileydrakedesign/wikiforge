@@ -53,7 +53,7 @@ Good answers can be filed back into the wiki as new pages. A comparison you crea
   <critical>This is a key insight: your explorations should compound in the knowledge base, not disappear into chat history. Filing is delegated to the `wforge-file-answer` skill — there is one canonical filing path for the whole wiki, and this is it.</critical>
   <check if="the answer synthesized multiple pages into a novel comparison, analysis, or connection">
 {{#if (eq config.workflows.ingestion_style "autonomous")}}
-    <action>Maturity check: verify the synthesis drew from at least 3 wiki pages. If it drew from fewer, the wiki is too thin for reliable autonomous synthesis — offer filing to the user via `wforge-file-answer` and WAIT for confirmation instead of auto-filing</action>
+    <action>Maturity check: verify the synthesis drew from at least {{config.maturity.synthesis_pages_min}} wiki pages. If it drew from fewer, the wiki is too thin for reliable autonomous synthesis — offer filing to the user via `wforge-file-answer` and WAIT for confirmation instead of auto-filing</action>
     <action>If sufficient pages contributed: invoke `wforge-file-answer` directly with the answer payload — it will route to `wiki/comparisons/`, `wiki/concepts/`, or `wiki/entities/` by shape, create the page with proper frontmatter and bidirectional cross-references, update the index, and log the creation with `[AUTO]` prefix</action>
 {{else}}
     <action>Offer to invoke `wforge-file-answer` with the answer payload. file-answer will route the page to `wiki/comparisons/`, `wiki/concepts/`, or `wiki/entities/` by shape and handle frontmatter, cross-linking, indexing, and logging</action>

@@ -1,7 +1,7 @@
 {
   "name": "wikiforge",
   "version": "0.1.0",
-  "description": "Scaffold LLM-powered research agent repositories through an interactive terminal questionnaire",
+  "description": "Scaffold an LLM Wiki — a compounding, agent-maintained knowledge base — through an interactive terminal questionnaire",
   "type": "module",
   "bin": {
     "wforge": "./dist/index.js",
