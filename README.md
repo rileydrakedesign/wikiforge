@@ -31,7 +31,7 @@
 ## What you get
 
 ```bash
-npx wikiforge init
+npx wforge init
 ```
 
 60 seconds later:
@@ -264,10 +264,10 @@ Early release. The CLI is feature-complete and tested. Install with npm:
 
 ```bash
 # one-shot, no install
-npx wikiforge init
+npx wforge init
 
 # or install globally for repeated use
-npm install -g wikiforge
+npm install -g wforge
 wforge init
 ```
 

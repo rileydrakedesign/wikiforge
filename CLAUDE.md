@@ -36,7 +36,7 @@ Three loops are what make a generated repo a compounding wiki rather than a note
 - **Rendering**: Handlebars templates (`.hbs` files in `templates/`)
 - **Styling**: Chalk (terminal colors), Ora (spinners)
 - **Config**: YAML (wikiforge.yaml)
-- **Distribution**: npm — `npx wikiforge init` / `wforge init`
+- **Distribution**: npm — `npx wforge init`
 
 ## Project Structure
 
