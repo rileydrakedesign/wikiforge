@@ -1,5 +1,5 @@
 {
-  "name": "wforge",
+  "name": "wforge-cli",
   "version": "0.1.0",
   "description": "Scaffold an LLM Wiki — a compounding, agent-maintained knowledge base — through an interactive terminal questionnaire",
   "type": "module",

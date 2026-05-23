@@ -31,7 +31,7 @@
 ## What you get
 
 ```bash
-npx wforge init
+npx wforge-cli init
 ```
 
 60 seconds later:
@@ -264,10 +264,10 @@ Early release. The CLI is feature-complete and tested. Install with npm:
 
 ```bash
 # one-shot, no install
-npx wforge init
+npx wforge-cli init
 
 # or install globally for repeated use
-npm install -g wforge
+npm install -g wforge-cli
 wforge init
 ```
 
