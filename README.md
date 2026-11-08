@@ -34,6 +34,7 @@
 Claude Code:   claude plugin install wikiforge --marketplace rileydrakedesign/wikiforge
 Codex:         codex plugin marketplace add rileydrakedesign/wikiforge   then install wikiforge from /plugins
 Cursor:        /add-plugin wikiforge   (once listed)   or add this repo under Customize > Plugins
+Any agent:     npx skills add rileydrakedesign/wikiforge
 CLI only:      npx wforge-cli init
 ```
 

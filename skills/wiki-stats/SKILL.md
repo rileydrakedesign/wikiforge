@@ -1,6 +1,6 @@
 ---
 name: wiki-stats
-description: Produce a statistics and health dashboard for a markdown wiki folder: page counts by type, link density, hub and orphan pages, recent activity from log.md, and source coverage. Read-only. Use when asked how big or how healthy a wiki is, or what to work on next.
+description: Produce a statistics and health dashboard for a markdown wiki folder, covering page counts by type, link density, hub and orphan pages, recent activity from log.md, and source coverage. Read-only. Use when asked how big or how healthy a wiki is, or what to work on next.
 ---
 # Wiki Stats
 
