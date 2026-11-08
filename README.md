@@ -28,6 +28,19 @@
 
 ---
 
+## Install
+
+```
+Claude Code:   claude plugin install wikiforge --marketplace rileydrakedesign/wikiforge
+Codex:         codex plugin marketplace add rileydrakedesign/wikiforge   then install wikiforge from /plugins
+Cursor:        /add-plugin wikiforge   (once listed)   or add this repo under Customize > Plugins
+CLI only:      npx wforge-cli init
+```
+
+The plugin ships three standalone skills that work on any folder of markdown pages: `lint-wiki`, `reindex`, and `wiki-stats`. The CLI scaffolds a full wiki with 8 agents and 22 workflow skills.
+
+---
+
 ## What you get
 
 ```bash
