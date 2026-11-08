@@ -1,0 +1,14 @@
+{
+  "name": "wikiforge",
+  "owner": {
+    "name": "Riley Drake"
+  },
+  "description": "WikiForge plugin: maintenance skills for LLM Wikis.",
+  "plugins": [
+    {
+      "name": "wikiforge",
+      "source": "./",
+      "description": "Maintenance skills for LLM Wikis: lint, reindex, and stats for any folder of interlinked markdown pages."
+    }
+  ]
+}

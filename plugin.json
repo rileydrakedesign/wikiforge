@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "wikiforge",
+  "version": "0.1.0",
+  "description": "Maintenance skills for LLM Wikis: lint, reindex, and stats for any folder of interlinked markdown pages. Scaffold a full wiki with npx wforge-cli init."
+}
